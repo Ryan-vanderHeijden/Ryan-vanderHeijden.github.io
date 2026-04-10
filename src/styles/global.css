@@ -9,7 +9,7 @@
 
 /* ── Base ── */
 html {
-  font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', ui-monospace, monospace;
+  font-family: 'Roboto Mono', 'Fira Code', ui-monospace, monospace;
   font-size: 16px;
   line-height: 1.6;
   background-color: var(--bg);
