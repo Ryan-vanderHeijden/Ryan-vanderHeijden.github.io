@@ -7,9 +7,10 @@ const { path } = Astro.props;
 
 const NAV_LINKS = [
   { href: '/',         label: '~/'         },
-  { href: '/projects', label: '~/projects' },
-  { href: '/blog',     label: '~/blog'     },
-  { href: '/about',    label: '~/about'    },
+  { href: '/projects',     label: '~/projects'     },
+  { href: '/blog',         label: '~/blog'         },
+  { href: '/publications', label: '~/publications' },
+  { href: '/about',        label: '~/about'        },
 ];
 
 const termPath = path === '/' ? '~' : `~${path}`;

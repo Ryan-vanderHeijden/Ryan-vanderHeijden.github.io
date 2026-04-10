@@ -1,0 +1,181 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TerminalFrame from '../../components/TerminalFrame.astro';
+
+const papers = [
+  {
+    van der Heijden, R., Dadkhah, A., Hamshaw, S., Dewoolkar, M., Ghazanfari, E., Jones, N., Williams, G., Clement, P., and Rizzo, D. M. (2025). “Identifying and interpreting physical processes and National Water Model prediction bias associated with baseflow index regimes across the contiguous United States.” Water Resour. Res., in review.
+  },
+  {
+    title: 'Another Placeholder Paper',
+    authors: 'van der Heijden, R., Coauthor, A.',
+    venue: 'Water Resources Research',
+    year: '2024',
+    doi: '#',
+  },
+];
+
+const presentations = [
+  {
+    title: 'Placeholder Presentation Title',
+    venue: 'AGU Fall Meeting',
+    year: '2025',
+    link: '#',
+  },
+  {
+    title: 'Another Placeholder Talk',
+    venue: 'EGU General Assembly',
+    year: '2024',
+    link: '#',
+  },
+];
+
+const dataReleases = [
+  {
+    title: 'Placeholder Dataset',
+    description: 'Brief description of what the dataset contains and how it was collected.',
+    year: '2025',
+    link: '#',
+  },
+  {
+    title: 'Another Placeholder Release',
+    description: 'Another dataset entry. Link to Zenodo, HydroShare, or a data repository.',
+    year: '2024',
+    link: '#',
+  },
+];
+---
+
+<Layout title="publications" path="/publications">
+  <h2 class="page-title">publications</h2>
+  <p class="page-sub muted">papers, presentations, and datasets.</p>
+
+  <TerminalFrame title="papers">
+    {papers.map(p => (
+      <div class="pub-item">
+        <div class="pub-header">
+          <span class="pub-title">{p.title}</span>
+          <time class="year muted">{p.year}</time>
+        </div>
+        <p class="pub-authors muted">{p.authors}</p>
+        <div class="pub-footer">
+          <span class="venue">{p.venue}</span>
+          <a href={p.doi} class="pub-link">→ doi</a>
+        </div>
+      </div>
+    ))}
+  </TerminalFrame>
+
+  <TerminalFrame title="presentations">
+    {presentations.map(p => (
+      <div class="pub-item">
+        <div class="pub-header">
+          <span class="pub-title">{p.title}</span>
+          <time class="year muted">{p.year}</time>
+        </div>
+        <div class="pub-footer">
+          <span class="venue">{p.venue}</span>
+          <a href={p.link} class="pub-link">→ slides</a>
+        </div>
+      </div>
+    ))}
+  </TerminalFrame>
+
+  <TerminalFrame title="data-releases">
+    {dataReleases.map(d => (
+      <div class="pub-item">
+        <div class="pub-header">
+          <span class="pub-title">{d.title}</span>
+          <time class="year muted">{d.year}</time>
+        </div>
+        <p class="pub-desc muted">{d.description}</p>
+        <div class="pub-footer">
+          <a href={d.link} class="pub-link">→ repository</a>
+        </div>
+      </div>
+    ))}
+  </TerminalFrame>
+</Layout>
+
+<style>
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .page-sub {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .muted { color: var(--fg-muted); }
+
+  .pub-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pub-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  :global(.frame .body) > .pub-item + .pub-item {
+    padding-top: 0.75rem;
+  }
+
+  .pub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .pub-title {
+    font-weight: 500;
+    color: var(--fg);
+  }
+
+  .year {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .pub-authors {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .pub-desc {
+    font-size: 0.85rem;
+    line-height: 1.65;
+  }
+
+  .pub-footer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .venue {
+    color: var(--ansi-cyan);
+    font-size: 0.82rem;
+  }
+
+  .pub-link {
+    margin-left: auto;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+
+  .pub-link:hover {
+    color: var(--accent-bright);
+  }
+</style>
