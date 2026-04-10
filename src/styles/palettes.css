@@ -1,5 +1,23 @@
+/* ── Shoyu ── */
+:root[data-palette="Shoyu"] {
+  --bg: #0c0b09;
+  --bg-surface: #171410;
+  --fg: #ddd5cc;
+  --fg-muted: #7d7268;
+  --accent: #a87c5a;
+  --accent-bright: #c09070;
+  --green: #6a8855;
+  --amber: #a88840;
+  --border: #302820;
+  --cursor: #a87c5a;
+  --ansi-red: #c06848;
+  --ansi-green: #6a8855;
+  --ansi-yellow: #a88840;
+  --ansi-blue: #7090a8;
+  --ansi-cyan: #609090;
+}
+
 /* ── Synthwave ── */
-:root,
 :root[data-palette="synthwave"] {
   --bg: #1a0933;
   --bg-surface: #2b1155;
@@ -73,23 +91,4 @@
   --ansi-yellow: #c89010;
   --ansi-blue: #5070a0;
   --ansi-cyan: #408090;
-}
-
-/* ── Shoyu ── */
-[data-palette="Shoyu"] {
-  --bg: #0c0b09;
-  --bg-surface: #171410;
-  --fg: #ddd5cc;
-  --fg-muted: #7d7268;
-  --accent: #a87c5a;
-  --accent-bright: #c09070;
-  --green: #6a8855;
-  --amber: #a88840;
-  --border: #302820;
-  --cursor: #a87c5a;
-  --ansi-red: #c06848;
-  --ansi-green: #6a8855;
-  --ansi-yellow: #a88840;
-  --ansi-blue: #7090a8;
-  --ansi-cyan: #609090;
 }
