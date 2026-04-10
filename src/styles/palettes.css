@@ -1,5 +1,24 @@
+/* ── RV Default ── */
+:root[data-palette="RV Default"] {
+  --bg: #0d0d1a;
+  --bg-surface: #13132b;
+  --fg: #f0e6ff;
+  --fg-muted: #9080b0;
+  --accent: #ff79c6;
+  --accent-bright: #ff92d0;
+  --green: #50fa7b;
+  --amber: #ffb86c;
+  --border: #44475a;
+  --cursor: #ff79c6;
+  --ansi-red: #ff5555;
+  --ansi-green: #50fa7b;
+  --ansi-yellow: #f1fa8c;
+  --ansi-blue: #bd93f9;
+  --ansi-cyan: #8be9fd;
+}
+
 /* ── Graham ── */
-:root[data-palette="Graham"] {
+[data-palette="Graham"] {
   --bg: #fdf6ec;
   --bg-surface: #f2e4cc;
   --fg: #2c1a0a;
@@ -15,6 +34,25 @@
   --ansi-yellow: #c89010;
   --ansi-blue: #5070a0;
   --ansi-cyan: #408090;
+}
+
+/* ── Shoyu ── */
+[data-palette="Shoyu"] {
+  --bg: #0c0b09;
+  --bg-surface: #171410;
+  --fg: #ddd5cc;
+  --fg-muted: #7d7268;
+  --accent: #a87c5a;
+  --accent-bright: #c09070;
+  --green: #6a8855;
+  --amber: #a88840;
+  --border: #302820;
+  --cursor: #a87c5a;
+  --ansi-red: #c06848;
+  --ansi-green: #6a8855;
+  --ansi-yellow: #a88840;
+  --ansi-blue: #7090a8;
+  --ansi-cyan: #609090;
 }
 
 /* ── Synthwave ── */
@@ -36,25 +74,6 @@
   --ansi-cyan: #05d9e8;
 }
 
-/* ── RV Default ── */
-[data-palette="RV default"] {
-  --bg: #0d0d1a;
-  --bg-surface: #13132b;
-  --fg: #f0e6ff;
-  --fg-muted: #9080b0;
-  --accent: #ff79c6;
-  --accent-bright: #ff92d0;
-  --green: #50fa7b;
-  --amber: #ffb86c;
-  --border: #44475a;
-  --cursor: #ff79c6;
-  --ansi-red: #ff5555;
-  --ansi-green: #50fa7b;
-  --ansi-yellow: #f1fa8c;
-  --ansi-blue: #bd93f9;
-  --ansi-cyan: #8be9fd;
-}
-
 /* ── Dark Terminal ── */
 [data-palette="dark"] {
   --bg: #0d1117;
@@ -72,23 +91,4 @@
   --ansi-yellow: #d29922;
   --ansi-blue: #58a6ff;
   --ansi-cyan: #39c5cf;
-}
-
-/* ── Shoyu ── */
-[data-palette="Shoyu"] {
-  --bg: #0c0b09;
-  --bg-surface: #171410;
-  --fg: #ddd5cc;
-  --fg-muted: #7d7268;
-  --accent: #a87c5a;
-  --accent-bright: #c09070;
-  --green: #6a8855;
-  --amber: #a88840;
-  --border: #302820;
-  --cursor: #a87c5a;
-  --ansi-red: #c06848;
-  --ansi-green: #6a8855;
-  --ansi-yellow: #a88840;
-  --ansi-blue: #7090a8;
-  --ansi-cyan: #609090;
 }

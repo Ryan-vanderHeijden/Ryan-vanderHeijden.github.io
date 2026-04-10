@@ -11,7 +11,7 @@ const { title, path = '/' } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" data-palette="Shoyu">
+<html lang="en" data-palette="RV Default">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,11 +25,11 @@ const { title, path = '/' } = Astro.props;
     <!-- Single source of truth for palettes; used by both FOUC-prevention and toggle -->
     <script is:inline>
       window.PALETTES = [
+        { id: 'RV Default', color: '#ff79c6', label: 'RV Default' },
+        { id: 'Graham',     color: '#c85000', label: 'Graham'     },
         { id: 'Shoyu',      color: '#a87c5a', label: 'Shoyu'      },
         { id: 'synthwave',  color: '#ff2a6d', label: 'Synthwave'  },
-        { id: 'RV default', color: '#ff79c6', label: 'RV Default' },
         { id: 'dark',       color: '#58a6ff', label: 'Dark'       },
-        { id: 'Graham',     color: '#c85000', label: 'Graham'     },
       ];
 
       // Prevent palette flash before paint
