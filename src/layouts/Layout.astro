@@ -11,7 +11,7 @@ const { title, path = '/' } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" data-palette="synthwave">
+<html lang="en" data-palette="Shoyu">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,11 +22,19 @@ const { title, path = '/' } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <!-- Prevent palette flash -->
+    <!-- Single source of truth for palettes; used by both FOUC-prevention and toggle -->
     <script is:inline>
+      window.PALETTES = [
+        { id: 'Shoyu',      color: '#a87c5a', label: 'Shoyu'      },
+        { id: 'synthwave',  color: '#ff2a6d', label: 'Synthwave'  },
+        { id: 'RV default', color: '#ff79c6', label: 'RV Default' },
+        { id: 'dark',       color: '#58a6ff', label: 'Dark'       },
+        { id: 'Graham',     color: '#c85000', label: 'Graham'     },
+      ];
+
+      // Prevent palette flash before paint
       const saved = localStorage.getItem('palette');
-      const valid = ['synthwave', 'RV default', 'dark', 'Shoyu', 'Graham'];
-      if (saved && valid.includes(saved)) {
+      if (saved && window.PALETTES.some(p => p.id === saved)) {
         document.documentElement.dataset.palette = saved;
       }
     </script>
@@ -55,19 +63,11 @@ const { title, path = '/' } = Astro.props;
     </div>
 
     <script is:inline>
-      const PALETTES = [
-        { id: 'Shoyu',      color: '#a87c5a', label: 'Shoyu'       },
-        { id: 'synthwave',  color: '#ff2a6d', label: 'Synthwave'   },
-        { id: 'RV default', color: '#ff79c6', label: 'RV Default'  },
-        { id: 'dark',       color: '#58a6ff', label: 'Dark'        },
-        { id: 'Graham',        color: '#c85000', label: 'Graham'   },
-      ];
-
       function renderToggle() {
-        const current = document.documentElement.dataset.palette || 'dark';
+        const current = document.documentElement.dataset.palette;
         const el = document.getElementById('palette-toggle');
         if (!el) return;
-        el.innerHTML = PALETTES.map(p =>
+        el.innerHTML = window.PALETTES.map(p =>
           `<button
             class="palette-btn${p.id === current ? ' active' : ''}"
             data-palette="${p.id}"
