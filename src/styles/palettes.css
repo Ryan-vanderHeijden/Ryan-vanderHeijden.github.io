@@ -37,45 +37,6 @@
   --ansi-cyan: #8be9fd;
 }
 
-
-/* ── Amber CRT ── */
-/* [data-palette="amber"] {
-  --bg: #1a0f00;
-  --bg-surface: #261500;
-  --fg: #ffb000;
-  --fg-muted: #996600;
-  --accent: #ffd000;
-  --accent-bright: #ffe040;
-  --green: #80c000;
-  --amber: #ffd000;
-  --border: #5a3a00;
-  --cursor: #ffd000;
-  --ansi-red: #ff6060;
-  --ansi-green: #80c000;
-  --ansi-yellow: #ffd000;
-  --ansi-blue: #60a0ff;
-  --ansi-cyan: #40c0c0;
-} */
-
-/* ── Green Phosphor ── */
-/* [data-palette="green"] {
-  --bg: #0a130a;
-  --bg-surface: #0f1f0f;
-  --fg: #00c800;
-  --fg-muted: #006400;
-  --accent: #00ff00;
-  --accent-bright: #40ff40;
-  --green: #00ff00;
-  --amber: #c8c800;
-  --border: #005000;
-  --cursor: #00ff00;
-  --ansi-red: #ff6060;
-  --ansi-green: #00ff00;
-  --ansi-yellow: #c8c800;
-  --ansi-blue: #0080ff;
-  --ansi-cyan: #00c8c8;
-} */
-
 /* ── Dark Terminal ── */
 [data-palette="dark"] {
   --bg: #0d1117;
@@ -95,21 +56,40 @@
   --ansi-cyan: #39c5cf;
 }
 
-/* ── Mocha ── */
-/* [data-palette="mocha"] {
-  --bg: #1e1a18;
-  --bg-surface: #2a2420;
-  --fg: #e8d8cc;
-  --fg-muted: #9a8878;
-  --accent: #c9a87c;
-  --accent-bright: #e0c090;
-  --green: #98b080;
-  --amber: #c9a050;
-  --border: #5a4a3a;
-  --cursor: #c9a87c;
-  --ansi-red: #e07060;
-  --ansi-green: #98b080;
-  --ansi-yellow: #c9a050;
-  --ansi-blue: #7090c0;
-  --ansi-cyan: #70a0b0;
-} */
+/* ── Graham ── */
+[data-palette="Graham"] {
+  --bg: #fdf6ec;
+  --bg-surface: #f2e4cc;
+  --fg: #2c1a0a;
+  --fg-muted: #8a6040;
+  --accent: #c85000;
+  --accent-bright: #e06820;
+  --green: #6a7a20;
+  --amber: #c89010;
+  --border: #d4b880;
+  --cursor: #c85000;
+  --ansi-red: #c83020;
+  --ansi-green: #6a7a20;
+  --ansi-yellow: #c89010;
+  --ansi-blue: #5070a0;
+  --ansi-cyan: #408090;
+}
+
+/* ── Shoyu ── */
+[data-palette="Shoyu"] {
+  --bg: #0c0b09;
+  --bg-surface: #171410;
+  --fg: #ddd5cc;
+  --fg-muted: #7d7268;
+  --accent: #a87c5a;
+  --accent-bright: #c09070;
+  --green: #6a8855;
+  --amber: #a88840;
+  --border: #302820;
+  --cursor: #a87c5a;
+  --ansi-red: #c06848;
+  --ansi-green: #6a8855;
+  --ansi-yellow: #a88840;
+  --ansi-blue: #7090a8;
+  --ansi-cyan: #609090;
+}

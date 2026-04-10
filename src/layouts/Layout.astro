@@ -25,7 +25,7 @@ const { title, path = '/' } = Astro.props;
     <!-- Prevent palette flash -->
     <script is:inline>
       const saved = localStorage.getItem('palette');
-      const valid = ['synthwave', 'RV default', 'dark'];
+      const valid = ['synthwave', 'RV default', 'dark', 'Shoyu', 'sol'];
       if (saved && valid.includes(saved)) {
         document.documentElement.dataset.palette = saved;
       }
@@ -59,6 +59,8 @@ const { title, path = '/' } = Astro.props;
         { id: 'synthwave',  color: '#ff2a6d', label: 'Synthwave'   },
         { id: 'RV default', color: '#ff79c6', label: 'RV Default'  },
         { id: 'dark',       color: '#58a6ff', label: 'Dark'        },
+        { id: 'Shoyu',      color: '#a87c5a', label: 'Shoyu'      },
+        { id: 'Graham',        color: '#c85000', label: 'Graham'        },
       ];
 
       function renderToggle() {
