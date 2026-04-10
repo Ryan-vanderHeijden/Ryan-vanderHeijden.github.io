@@ -11,7 +11,7 @@ const { title, path = '/' } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" data-palette="dark">
+<html lang="en" data-palette="synthwave">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,7 +25,7 @@ const { title, path = '/' } = Astro.props;
     <!-- Prevent palette flash -->
     <script is:inline>
       const saved = localStorage.getItem('palette');
-      const valid = ['dark','amber','green','synthwave','mocha'];
+      const valid = ['synthwave', 'RV default', 'dark'];
       if (saved && valid.includes(saved)) {
         document.documentElement.dataset.palette = saved;
       }
@@ -56,11 +56,9 @@ const { title, path = '/' } = Astro.props;
 
     <script is:inline>
       const PALETTES = [
-        { id: 'dark',      color: '#58a6ff', label: 'Dark Terminal'  },
-        { id: 'amber',     color: '#ffd000', label: 'Amber CRT'      },
-        { id: 'green',     color: '#00e000', label: 'Green Phosphor' },
-        { id: 'synthwave', color: '#ff79c6', label: 'Synthwave'      },
-        { id: 'mocha',     color: '#c9a87c', label: 'Mocha'          },
+        { id: 'synthwave',  color: '#ff2a6d', label: 'Synthwave'   },
+        { id: 'RV default', color: '#ff79c6', label: 'RV Default'  },
+        { id: 'dark',       color: '#58a6ff', label: 'Dark'        },
       ];
 
       function renderToggle() {

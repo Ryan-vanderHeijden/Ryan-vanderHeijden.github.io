@@ -17,7 +17,9 @@
   --ansi-blue: #7a5cff;
   --ansi-cyan: #05d9e8;
 }
-/* [data-palette="synthwave"] {
+
+/* ── RV Default ── */
+[data-palette="RV default"] {
   --bg: #0d0d1a;
   --bg-surface: #13132b;
   --fg: #f0e6ff;
@@ -33,11 +35,11 @@
   --ansi-yellow: #f1fa8c;
   --ansi-blue: #bd93f9;
   --ansi-cyan: #8be9fd;
-} */
+}
 
 
 /* ── Amber CRT ── */
-[data-palette="amber"] {
+/* [data-palette="amber"] {
   --bg: #1a0f00;
   --bg-surface: #261500;
   --fg: #ffb000;
@@ -53,10 +55,10 @@
   --ansi-yellow: #ffd000;
   --ansi-blue: #60a0ff;
   --ansi-cyan: #40c0c0;
-}
+} */
 
 /* ── Green Phosphor ── */
-[data-palette="green"] {
+/* [data-palette="green"] {
   --bg: #0a130a;
   --bg-surface: #0f1f0f;
   --fg: #00c800;
@@ -72,7 +74,7 @@
   --ansi-yellow: #c8c800;
   --ansi-blue: #0080ff;
   --ansi-cyan: #00c8c8;
-}
+} */
 
 /* ── Dark Terminal ── */
 [data-palette="dark"] {
@@ -94,7 +96,7 @@
 }
 
 /* ── Mocha ── */
-[data-palette="mocha"] {
+/* [data-palette="mocha"] {
   --bg: #1e1a18;
   --bg-surface: #2a2420;
   --fg: #e8d8cc;
@@ -110,4 +112,4 @@
   --ansi-yellow: #c9a050;
   --ansi-blue: #7090c0;
   --ansi-cyan: #70a0b0;
-}
+} */
