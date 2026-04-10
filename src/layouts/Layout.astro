@@ -1,0 +1,88 @@
+---
+import Nav from '../components/Nav.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  path?: string;
+}
+
+const { title, path = '/' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-palette="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} — ryan.dev</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Prevent palette flash -->
+    <script is:inline>
+      const saved = localStorage.getItem('palette');
+      const valid = ['dark','amber','green','synthwave','mocha'];
+      if (saved && valid.includes(saved)) {
+        document.documentElement.dataset.palette = saved;
+      }
+    </script>
+  </head>
+  <body>
+    <div class="site-container">
+      <header class="site-header">
+        <Nav path={path} />
+        <div class="palette-toggle" id="palette-toggle"></div>
+      </header>
+
+      <main class="site-main">
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <span>© 2026 Ryan van der Heijden</span>
+        <span>·</span>
+        <a href="https://github.com/ryanvan">github</a>
+        <span>·</span>
+        <span>no cookies · no analytics · no tracking</span>
+      </footer>
+    </div>
+
+    <script is:inline>
+      const PALETTES = [
+        { id: 'dark',      color: '#58a6ff', label: 'Dark Terminal'  },
+        { id: 'amber',     color: '#ffd000', label: 'Amber CRT'      },
+        { id: 'green',     color: '#00e000', label: 'Green Phosphor' },
+        { id: 'synthwave', color: '#ff79c6', label: 'Synthwave'      },
+        { id: 'mocha',     color: '#c9a87c', label: 'Mocha'          },
+      ];
+
+      function renderToggle() {
+        const current = document.documentElement.dataset.palette || 'dark';
+        const el = document.getElementById('palette-toggle');
+        if (!el) return;
+        el.innerHTML = PALETTES.map(p =>
+          `<button
+            class="palette-btn${p.id === current ? ' active' : ''}"
+            data-palette="${p.id}"
+            title="${p.label}"
+            style="background:${p.color}"
+          ></button>`
+        ).join('');
+        el.querySelectorAll('.palette-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const p = btn.dataset.palette;
+            document.documentElement.dataset.palette = p;
+            localStorage.setItem('palette', p);
+            renderToggle();
+          });
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', renderToggle);
+    </script>
+  </body>
+</html>

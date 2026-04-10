@@ -1,0 +1,82 @@
+---
+interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+
+const NAV_LINKS = [
+  { href: '/',         label: '~/'         },
+  { href: '/projects', label: '~/projects' },
+  { href: '/blog',     label: '~/blog'     },
+  { href: '/about',    label: '~/about'    },
+];
+
+const termPath = path === '/' ? '~' : `~${path}`;
+---
+
+<nav>
+  <div class="breadcrumb">
+    <span class="user">ryan@dev</span><span class="sep">:</span><span
+      class="dir">{termPath}</span><span class="dollar"> $</span><span
+      class="cursor">█</span>
+  </div>
+  <div class="links">
+    {NAV_LINKS.map(link => (
+      <a
+        href={link.href}
+        class={
+          path === link.href ||
+          (link.href !== '/' && path.startsWith(link.href))
+            ? 'active'
+            : ''
+        }
+      >{link.label}</a>
+    ))}
+  </div>
+</nav>
+
+<style>
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .breadcrumb {
+    font-size: 1rem;
+  }
+
+  .user  { color: var(--green); }
+  .sep   { color: var(--fg-muted); }
+  .dir   { color: var(--accent); }
+  .dollar { color: var(--fg-muted); }
+
+  .cursor {
+    display: inline-block;
+    color: var(--cursor);
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+    font-size: 0.9em;
+  }
+
+  .links {
+    display: flex;
+    gap: 1.5ch;
+    flex-wrap: wrap;
+  }
+
+  .links a {
+    color: var(--fg-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+
+  .links a:hover {
+    color: var(--accent-bright);
+  }
+
+  .links a.active {
+    color: var(--accent);
+  }
+</style>

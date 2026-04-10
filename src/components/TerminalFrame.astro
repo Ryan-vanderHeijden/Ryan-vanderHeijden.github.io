@@ -1,0 +1,39 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="frame">
+  <div class="titlebar">── {title} ──</div>
+  <div class="body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .frame {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+
+  .titlebar {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.3rem 0.875rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .body {
+    padding: 1rem 1.25rem;
+    background: var(--bg);
+  }
+</style>

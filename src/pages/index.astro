@@ -1,0 +1,101 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
+---
+
+<Layout title="home" path="/">
+  <section class="hero">
+    <h1><span class="accent">ryan</span>.dev</h1>
+    <p class="tagline">PhD · water resources · machine learning · complex systems</p>
+  </section>
+
+  <TerminalFrame title="whoami">
+    <dl class="info-grid">
+      <dt>name</dt>
+      <dd>Ryan van der Heijden</dd>
+
+      <dt>role</dt>
+      <dd>researcher &amp; scientist</dd>
+
+      <dt>focus</dt>
+      <dd>water resources · machine learning · complex systems</dd>
+
+      <dt>status</dt>
+      <dd class="green">open to collaboration</dd>
+    </dl>
+  </TerminalFrame>
+
+  <TerminalFrame title="./intro">
+    <p>
+      PhD researcher working at the intersection of
+      <span class="accent">hydrology</span>,
+      <span class="accent">machine learning</span>, and
+      <span class="accent">complex systems science</span>.
+    </p>
+    <p class="muted">
+      [Placeholder — add a sentence or two about your institution,
+      current research, or what you&apos;re excited about.]
+    </p>
+  </TerminalFrame>
+
+  <nav class="quick-links">
+    <a href="/projects">→ projects</a>
+    <a href="/blog">→ blog</a>
+    <a href="/about">→ about</a>
+  </nav>
+</Layout>
+
+<style>
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .tagline {
+    color: var(--fg-muted);
+    font-size: 0.95rem;
+  }
+
+  .accent { color: var(--accent); }
+  .green  { color: var(--green);  }
+  .muted  { color: var(--fg-muted); }
+
+  /* info grid inside whoami frame */
+  .info-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.3rem 2rem;
+    font-size: 0.9rem;
+  }
+
+  .info-grid dt {
+    color: var(--fg-muted);
+  }
+
+  /* spacing between paragraphs inside intro frame */
+  :global(.frame .body p + p) {
+    margin-top: 0.75rem;
+  }
+
+  .quick-links {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.75rem;
+    flex-wrap: wrap;
+  }
+
+  .quick-links a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .quick-links a:hover {
+    color: var(--accent-bright);
+  }
+</style>

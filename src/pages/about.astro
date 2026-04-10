@@ -1,0 +1,78 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
+---
+
+<Layout title="about" path="/about">
+  <h2 class="page-title">about</h2>
+
+  <TerminalFrame title="bio">
+    <p>
+      <strong class="accent">Ryan van der Heijden</strong> is a PhD researcher
+      specializing in water resources, machine learning, and complex systems science.
+    </p>
+    <p class="muted">
+      [Placeholder — describe your institution, research group, and what
+      drives your work. One to three sentences is plenty.]
+    </p>
+  </TerminalFrame>
+
+  <TerminalFrame title="research interests">
+    <ul class="list">
+      <li><span class="bullet">›</span> Hydrological modelling and prediction</li>
+      <li><span class="bullet">›</span> Machine learning for environmental science</li>
+      <li><span class="bullet">›</span> Complex systems and network dynamics</li>
+      <li><span class="bullet">›</span> [Add more topics as needed]</li>
+    </ul>
+  </TerminalFrame>
+
+  <TerminalFrame title="contact">
+    <dl class="contact-grid">
+      <dt>email</dt>
+      <dd><a href="mailto:placeholder@example.com">placeholder@example.com</a></dd>
+
+      <dt>github</dt>
+      <dd><a href="https://github.com/placeholder">@placeholder</a></dd>
+
+      <dt>scholar</dt>
+      <dd><a href="#">Google Scholar</a></dd>
+
+      <dt>orcid</dt>
+      <dd><a href="#">0000-0000-0000-0000</a></dd>
+    </dl>
+  </TerminalFrame>
+</Layout>
+
+<style>
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .accent { color: var(--accent); }
+  .muted  { color: var(--fg-muted); }
+  .bullet { color: var(--accent); margin-right: 0.5ch; }
+
+  :global(.frame .body p + p) {
+    margin-top: 0.75rem;
+  }
+
+  .list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 2rem;
+    font-size: 0.9rem;
+  }
+
+  .contact-grid dt {
+    color: var(--fg-muted);
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
+
+const projects = [
+  {
+    slug: 'project-alpha',
+    title: 'Placeholder Project Alpha',
+    year: '2025',
+    tags: ['python', 'machine-learning', 'hydrology'],
+    description:
+      'Placeholder project description. Replace with your actual project — what it does, the problem it solves, and any notable results.',
+    link: '#',
+  },
+  {
+    slug: 'project-beta',
+    title: 'Placeholder Project Beta',
+    year: '2024',
+    tags: ['python', 'complex-systems', 'network-analysis'],
+    description:
+      'Another placeholder. Describe the tools, datasets, or methods you used. Link to a paper, GitHub repo, or demo.',
+    link: '#',
+  },
+  {
+    slug: 'project-gamma',
+    title: 'Placeholder Project Gamma',
+    year: '2024',
+    tags: ['data-visualization', 'climate'],
+    description:
+      'A third placeholder project. You can add as many entries as you like by extending the array above.',
+    link: '#',
+  },
+];
+---
+
+<Layout title="projects" path="/projects">
+  <h2 class="page-title">projects</h2>
+  <p class="page-sub muted">research, tools, and experiments.</p>
+
+  {projects.map(p => (
+    <TerminalFrame title={p.slug}>
+      <div class="project">
+        <div class="project-header">
+          <span class="project-name">{p.title}</span>
+          <span class="year muted">{p.year}</span>
+        </div>
+        <p class="desc">{p.description}</p>
+        <div class="meta">
+          <span class="tags">
+            {p.tags.map(t => <span class="tag">{t}</span>)}
+          </span>
+          <a href={p.link} class="view-link">→ view</a>
+        </div>
+      </div>
+    </TerminalFrame>
+  ))}
+</Layout>
+
+<style>
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .page-sub {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .muted { color: var(--fg-muted); }
+
+  .project {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .project-name {
+    font-weight: 500;
+    color: var(--fg);
+  }
+
+  .year {
+    font-size: 0.8rem;
+  }
+
+  .desc {
+    line-height: 1.65;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.6ch;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    color: var(--ansi-cyan);
+    font-size: 0.8rem;
+  }
+
+  .tag::before {
+    content: '#';
+    color: var(--fg-muted);
+  }
+
+  .view-link {
+    margin-left: auto;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+
+  .view-link:hover {
+    color: var(--accent-bright);
+  }
+</style>

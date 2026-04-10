@@ -1,0 +1,107 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TerminalFrame from '../../components/TerminalFrame.astro';
+
+const posts = [
+  {
+    slug: 'placeholder-post-one',
+    title: 'Placeholder Post Title',
+    date: '2025-03-01',
+    summary:
+      'A brief summary of what this post covers. Replace with your actual writing — research notes, methodology deep-dives, or opinion pieces.',
+    tags: ['research', 'machine-learning'],
+  },
+  {
+    slug: 'placeholder-post-two',
+    title: 'Another Placeholder Post',
+    date: '2025-01-15',
+    summary:
+      'Another placeholder entry. Add more posts by extending this array, or migrate to Astro content collections later.',
+    tags: ['hydrology', 'complex-systems'],
+  },
+];
+---
+
+<Layout title="blog" path="/blog">
+  <h2 class="page-title">blog</h2>
+  <p class="page-sub muted">notes, research updates, and longer-form writing.</p>
+
+  {posts.map(post => (
+    <TerminalFrame title={post.slug}>
+      <div class="post">
+        <div class="post-header">
+          <a href={`/blog/${post.slug}`} class="post-title">{post.title}</a>
+          <time class="date muted" datetime={post.date}>{post.date}</time>
+        </div>
+        <p class="summary muted">{post.summary}</p>
+        <div class="tags">
+          {post.tags.map(t => <span class="tag">{t}</span>)}
+        </div>
+      </div>
+    </TerminalFrame>
+  ))}
+</Layout>
+
+<style>
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .page-sub {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .muted { color: var(--fg-muted); }
+
+  .post {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .post-title {
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--accent);
+  }
+
+  .post-title:hover {
+    color: var(--accent-bright);
+  }
+
+  .date {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .summary {
+    line-height: 1.65;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.6ch;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    color: var(--ansi-cyan);
+    font-size: 0.8rem;
+  }
+
+  .tag::before {
+    content: '#';
+    color: var(--fg-muted);
+  }
+</style>
