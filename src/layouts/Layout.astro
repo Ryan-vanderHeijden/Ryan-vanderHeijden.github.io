@@ -32,6 +32,7 @@ const { title, path = '/' } = Astro.props;
     </script>
   </head>
   <body>
+    <div id="ascii-bg" aria-hidden="true"></div>
     <div class="site-container">
       <header class="site-header">
         <Nav path={path} />
@@ -83,6 +84,10 @@ const { title, path = '/' } = Astro.props;
       }
 
       document.addEventListener('DOMContentLoaded', renderToggle);
+    </script>
+
+    <script>
+      import '../islands/ascii-bg';
     </script>
   </body>
 </html>

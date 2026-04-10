@@ -39,8 +39,23 @@ a:hover {
   50% { opacity: 0; }
 }
 
+/* ── ASCII background ── */
+#ascii-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
 /* ── Site layout ── */
 .site-container {
+  position: relative;
+  z-index: 1;
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
