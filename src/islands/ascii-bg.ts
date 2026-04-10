@@ -45,14 +45,15 @@ function init() {
   const container = document.getElementById('ascii-bg');
   if (!container) return;
 
-  // Measure actual monospace character dimensions
-  const ruler = Object.assign(document.createElement('span'), { textContent: 'X' });
+  // Measure character dimensions using a wide string for accuracy
+  const SAMPLE = 'X'.repeat(20);
+  const ruler = Object.assign(document.createElement('span'), { textContent: SAMPLE });
   Object.assign(ruler.style, {
-    position: 'absolute', visibility: 'hidden',
+    position: 'absolute', visibility: 'hidden', whiteSpace: 'pre',
     fontFamily: 'inherit', fontSize: 'inherit', lineHeight: '1',
   });
   container.appendChild(ruler);
-  const charW = ruler.offsetWidth  || 7.2;
+  const charW = (ruler.offsetWidth  / SAMPLE.length) || 7.2;
   const charH = ruler.offsetHeight || 12;
   container.removeChild(ruler);
 
@@ -65,6 +66,7 @@ function init() {
       margin: '0', padding: '0',
       fontFamily: 'inherit', fontSize: 'inherit',
       lineHeight: '1',
+      whiteSpace: 'pre',
       color,
       overflow: 'hidden',
       pointerEvents: 'none',
@@ -77,8 +79,8 @@ function init() {
   let rows = 0;
 
   function resize() {
-    cols = Math.ceil(window.innerWidth  / charW) + 1;
-    rows = Math.ceil(window.innerHeight / charH) + 1;
+    cols = Math.ceil(window.innerWidth  / charW) + 3;
+    rows = Math.ceil(window.innerHeight / charH) + 2;
   }
   resize();
   window.addEventListener('resize', resize);
