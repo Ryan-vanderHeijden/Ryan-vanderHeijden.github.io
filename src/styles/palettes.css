@@ -1,22 +1,23 @@
-/* ── Dark Terminal (default) ── */
+/* ── Synthwave ── */
 :root,
-[data-palette="dark"] {
-  --bg: #0d1117;
-  --bg-surface: #161b22;
-  --fg: #e6edf3;
-  --fg-muted: #8b949e;
-  --accent: #58a6ff;
-  --accent-bright: #79b8ff;
-  --green: #3fb950;
-  --amber: #d29922;
-  --border: #30363d;
-  --cursor: #58a6ff;
-  --ansi-red: #ff7b72;
-  --ansi-green: #3fb950;
-  --ansi-yellow: #d29922;
-  --ansi-blue: #58a6ff;
-  --ansi-cyan: #39c5cf;
+[data-palette="synthwave"] {
+  --bg: #0d0d1a;
+  --bg-surface: #13132b;
+  --fg: #f0e6ff;
+  --fg-muted: #9080b0;
+  --accent: #ff79c6;
+  --accent-bright: #ff92d0;
+  --green: #50fa7b;
+  --amber: #ffb86c;
+  --border: #44475a;
+  --cursor: #ff79c6;
+  --ansi-red: #ff5555;
+  --ansi-green: #50fa7b;
+  --ansi-yellow: #f1fa8c;
+  --ansi-blue: #bd93f9;
+  --ansi-cyan: #8be9fd;
 }
+
 
 /* ── Amber CRT ── */
 [data-palette="amber"] {
@@ -56,23 +57,23 @@
   --ansi-cyan: #00c8c8;
 }
 
-/* ── Synthwave ── */
-[data-palette="synthwave"] {
-  --bg: #0d0d1a;
-  --bg-surface: #13132b;
-  --fg: #f0e6ff;
-  --fg-muted: #9080b0;
-  --accent: #ff79c6;
-  --accent-bright: #ff92d0;
-  --green: #50fa7b;
-  --amber: #ffb86c;
-  --border: #44475a;
-  --cursor: #ff79c6;
-  --ansi-red: #ff5555;
-  --ansi-green: #50fa7b;
-  --ansi-yellow: #f1fa8c;
-  --ansi-blue: #bd93f9;
-  --ansi-cyan: #8be9fd;
+/* ── Dark Terminal ── */
+[data-palette="dark"] {
+  --bg: #0d1117;
+  --bg-surface: #161b22;
+  --fg: #e6edf3;
+  --fg-muted: #8b949e;
+  --accent: #58a6ff;
+  --accent-bright: #79b8ff;
+  --green: #3fb950;
+  --amber: #d29922;
+  --border: #30363d;
+  --cursor: #58a6ff;
+  --ansi-red: #ff7b72;
+  --ansi-green: #3fb950;
+  --ansi-yellow: #d29922;
+  --ansi-blue: #58a6ff;
+  --ansi-cyan: #39c5cf;
 }
 
 /* ── Mocha ── */
