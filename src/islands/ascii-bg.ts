@@ -7,6 +7,16 @@
 const CHARS = ' -_:,;^+/|\\?0oOQ#%@';
 
 // Four sine-wave components per sample; constants chosen for organic flow
+
+// DEFAULTS
+// const NX   = [0.120, 0.072, 0.154, 0.090];
+// const NY   = [0.092, 0.140, 0.068, 0.113];
+// const NXY  = [0.051, 0.083, 0.062, 0.041];
+// const NXMY = [0.063, 0.044, 0.091, 0.072];
+// const NT   = [0.00042, 0.00061, 0.00035, 0.00055];
+// const PH   = [0, Math.PI * 0.5, Math.PI * 1.1, Math.PI * 1.7];
+
+// CUSTOM
 const NX   = [0.120, 0.072, 0.154, 0.090];
 const NY   = [0.092, 0.140, 0.068, 0.113];
 const NXY  = [0.051, 0.083, 0.062, 0.041];

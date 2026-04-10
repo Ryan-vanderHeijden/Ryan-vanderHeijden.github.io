@@ -1,6 +1,23 @@
 /* ── Synthwave ── */
 :root,
-[data-palette="synthwave"] {
+:root[data-palette="synthwave"] {
+  --bg: #1a0933;
+  --bg-surface: #2b1155;
+  --fg: #f9f8ff;
+  --fg-muted: #9d7dbe;
+  --accent: #ff2a6d;
+  --accent-bright: #ff5b8c;
+  --green: #05d9e8;
+  --amber: #f7b32b;
+  --border: #5e3c8a;
+  --cursor: #ff2a6d;
+  --ansi-red: #ff2a6d;
+  --ansi-green: #3bff88;
+  --ansi-amber: #f7b32b;
+  --ansi-blue: #7a5cff;
+  --ansi-cyan: #05d9e8;
+}
+/* [data-palette="synthwave"] {
   --bg: #0d0d1a;
   --bg-surface: #13132b;
   --fg: #f0e6ff;
@@ -16,7 +33,7 @@
   --ansi-yellow: #f1fa8c;
   --ansi-blue: #bd93f9;
   --ansi-cyan: #8be9fd;
-}
+} */
 
 
 /* ── Amber CRT ── */
