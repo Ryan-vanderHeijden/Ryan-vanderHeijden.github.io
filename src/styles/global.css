@@ -9,7 +9,7 @@
 
 /* ── Base ── */
 html {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', ui-monospace, monospace;
   font-size: 16px;
   line-height: 1.6;
   background-color: var(--bg);
@@ -44,12 +44,12 @@ a:hover {
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.12;
+  opacity: 0.10;
   pointer-events: none;
   overflow: hidden;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1;
-  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: 'Fira Code', 'JetBrains Mono', ui-monospace, monospace;
 }
 
 /* ── Site layout ── */
