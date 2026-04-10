@@ -4,13 +4,13 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 
 const projects = [
   {
-    slug: 'project-alpha',
-    title: 'Placeholder Project Alpha',
+    slug: 'hydro2dRP',
+    title: 'Bivariate dependency modeling for joint return periods',
     year: '2025',
-    tags: ['python', 'machine-learning', 'hydrology'],
+    tags: ['python', 'hydrology', 'extreme value', 'return period'],
     description:
-      'Placeholder project description. Replace with your actual project — what it does, the problem it solves, and any notable results.',
-    link: '#',
+      'Tools for bivariate extreme value analysis using the Gumbel copula, including Kendall risk contours. Intended for modeling joint-extremeness of hydrologic signals, but flexible and extensible to other use cases.',
+    link: 'https://github.com/Ryan-vanderHeijden/hydro2dRP',
   },
   {
     slug: 'project-beta',
@@ -49,7 +49,7 @@ const projects = [
           <span class="tags">
             {p.tags.map(t => <span class="tag">{t}</span>)}
           </span>
-          <a href={p.link} class="view-link">→ view</a>
+          <a href={p.link} class="view-link" target="_blank" rel="noopener">→ view</a>
         </div>
       </div>
     </TerminalFrame>

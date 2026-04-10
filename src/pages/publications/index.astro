@@ -4,44 +4,145 @@ import TerminalFrame from '../../components/TerminalFrame.astro';
 
 const papers = [
   {
-    van der Heijden, R., Dadkhah, A., Hamshaw, S., Dewoolkar, M., Ghazanfari, E., Jones, N., Williams, G., Clement, P., and Rizzo, D. M. (2025). “Identifying and interpreting physical processes and National Water Model prediction bias associated with baseflow index regimes across the contiguous United States.” Water Resour. Res., in review.
+    title: 'Identifying and interpreting physical processes and National Water Model prediction bias associated with baseflow index regimes across the contiguous United States.',
+    authors: 'van der Heijden, R., Dadkhah, A., Hamshaw, S., Dewoolkar, M., Ghazanfari, E., Jones, N., Williams, G., Clement, P., and Rizzo, D. M.',
+    venue: 'Water Resources Research',
+    year: 'In Review',
+    doi: '',
   },
   {
-    title: 'Another Placeholder Paper',
-    authors: 'van der Heijden, R., Coauthor, A.',
+    title: 'Applications of InSAR for Monitoring Post-Wildfire Ground Surface Displacements',
+    authors: 'van der Heijden, R., Ghazanfari, E., Rizzo, D. M., Leshchinsky, B., and Dewoolkar, M.',
+    venue: 'Remote Sensing',
+    year: '2025',
+    doi: 'https://doi.org/10.3390/rs17122047',
+  },
+  {
+    title: 'A Spatiotemporal Interrogation of Hydrologic Drought Model Performance for Machine Learning Model Interpretability',
+    authors: 'Dadkhah, A., Hamshaw, S. D., van der Heijden, R., and Rizzo, D. M.',
     venue: 'Water Resources Research',
+    year: '2025',
+    doi: 'https://doi.org/10.1029/2024WR039077',
+  },
+  {
+    title: 'Development and Comparison of Methods for Identification of Baseflow-Dominant Periods in Streamflow Records',
+    authors: 'Aghababaei, A., Jones, N., Williams, G., Webster-Esho, E., van der Heijden, R., Li, X., Clement, P., and Rizzo, D. M. ',
+    venue: 'Water',
+    year: '2025',
+    doi: 'https://doi.org/10.3390/w17213083',
+  },
+  {
+    title: 'Using Spatial Technologies to Assess Risk Factors for Diarrheal Disease Under Environmental Variability in Bangladesh: A Machine Learning Study',
+    authors: 'van der Heijden, R., Doran, E. M. B., King, P., Brown, K. P., Rizzo, D. M., & Gleason, K. M.',
+    venue: 'International Journal of Environmental Research and Public Health',
+    year: '2025',
+    doi: 'https://doi.org/10.3390/ijerph22111758',
+  },
+  {
+    title: 'Investigating the use of Xanthan Gum in Roadway Subbase Stabilization',
+    authors: 'van der Heijden, R., KC, B., Ghazanfari, E., and Dewoolkar, M.',
+    venue: 'Transportation Infrastructure Geotechnology',
+    year: '2025',
+    doi: 'https://doi.org/10.1007/s40515-025-00730-5',
+  },
+  {
+    title: 'Potentiometric Ion-Selective Membrane Sensing of Microbially Induced Calcite Precipitation',
+    authors: 'Worley, R. L., Badireddy, A. R., Khan, K., van der Heijden, R., and Dewoolkar, M.',
+    venue: 'Geotechnical Research',
     year: '2024',
-    doi: '#',
+    doi: 'https://doi.org/10.1680/jgere.23.00049',
+  },
+  {
+    title: 'Strength and Deformation Behavior of Equestrian Riding Surfaces Improved with Recycled Geosynthetics',
+    authors: 'Souza, B., van der Heijden, R., and Benoît, J.',
+    venue: 'Geotechnical Testing Journal',
+    year: '2024',
+    doi: '',
+  },
+  {
+    title: 'Geotechnical Properties of Equestrian Riding Surfaces',
+    authors: 'van der Heijden, R., Souza, B., Hawe, W., and Benoît, J.',
+    venue: 'Int. Conf. on Soil Mechanics and Geotechnical Engineering',
+    year: '2017',
+    doi: '',
   },
 ];
 
 const presentations = [
   {
-    title: 'Placeholder Presentation Title',
-    venue: 'AGU Fall Meeting',
+    title: 'Evaluating National Water Model streamflow prediction bias during identified drought events in the Colorado River Basin',
+    venue: 'AGU General Assembly',
     year: '2025',
-    link: '#',
+    link: '',
   },
   {
-    title: 'Another Placeholder Talk',
+    title: 'A Tandem Evolutionary Algorithm for Feature Selection (TEVA)',
+    venue: 'CIROH Developers Conference',
+    year: '2025',
+    link: '',
+  },
+  {
+    title: 'SHAP (Shapely Additive exPlanations) values for Interpretable Machine Learning',
+    venue: 'CIROH Developers Conference',
+    year: '2025',
+    link: '',
+  },
+  {
+    title: 'Using Interpretable Machine Learning to Reveal Processes Driving Baseflow Regimes Across CONUS',
+    venue: 'AGU General Assembly',
+    year: '2024',
+    link: '',
+  },
+  {
+    title: 'Analysis of baseflow signatures and streamflow error metrics across CONUS using and optimized digital filter',
+    venue: 'Proceedings of the Biennial Meeting of the International Environmental Modeling and Software Society (iEMSs)',
+    year: '2024',
+    link: 'https://doi.org/10.5281/zenodo.14285085',
+  },
+  {
+    title: 'Variable Threshold Method Reveals Distinct Clustering Across CONUS',
+    venue: 'CIROH Developers Conference',
+    year: '2024',
+    link: '',
+  },
+  {
+    title: 'Variable Drought Threshold Method for Low-Flow Behavior Reveals Distinct Clustering Across the Continental United States',
     venue: 'EGU General Assembly',
     year: '2024',
-    link: '#',
+    link: 'https://doi.org/10.5194/egusphere-egu24-13029',
+  },
+  {
+    title: 'Using Machine Learning to Determine Predictors of Childhood Diarrheal Disease in Bangladesh',
+    venue: '1st Annual CAFÉ Climate and Health Conference',
+    year: '2024',
+    link: '',
+  },
+  {
+    title: 'Using artificial neural networks to identify drivers of diarrheal disease in Bangladesh',
+    venue: 'Consortium of Universities for Global Health (CUGH)',
+    year: '2023',
+    link: '',
+  },
+  {
+    title: 'Investigating the use of Xanthan Gum in roadway subbase stabilization',
+    venue: 'Transportation Research Board Annual Meeting',
+    year: '2023',
+    link: '',
   },
 ];
 
 const dataReleases = [
   {
-    title: 'Placeholder Dataset',
-    description: 'Brief description of what the dataset contains and how it was collected.',
+    title: 'Long-Term Monthly Baseflow Index Signatures',
+    description: 'The data contains monthly mean baseflow indices (BFI) for 1,432 United Stated Geological Survey (USGS) streamflow gages across the Continental United States.',
     year: '2025',
-    link: '#',
+    link: 'https://doi.org/10.4211/hs.85ab212b18f543b0bd3c7b749cfeef66',
   },
   {
-    title: 'Another Placeholder Release',
-    description: 'Another dataset entry. Link to Zenodo, HydroShare, or a data repository.',
-    year: '2024',
-    link: '#',
+    title: 'NWM v3.0 performance and baseflow filter calibration at select streamgages',
+    description: 'The data contains a suite of performance metrics computed on National Water Model v3.0 retrospective simulated streamflow and observed streamflow at 797 USGS streamgages across the contiguous United States.',
+    year: '2025',
+    link: 'http://www.hydroshare.org/resource/db0853e8278a48acae8093e966ee1cf5',
   },
 ];
 ---
@@ -53,14 +154,12 @@ const dataReleases = [
   <TerminalFrame title="papers">
     {papers.map(p => (
       <div class="pub-item">
-        <div class="pub-header">
-          <span class="pub-title">{p.title}</span>
-          <time class="year muted">{p.year}</time>
-        </div>
+        <span class="pub-title">{p.title}</span>
         <p class="pub-authors muted">{p.authors}</p>
         <div class="pub-footer">
           <span class="venue">{p.venue}</span>
-          <a href={p.doi} class="pub-link">→ doi</a>
+          <time class="year muted">{p.year}</time>
+          {p.doi && <a href={p.doi} class="pub-link" target="_blank" rel="noopener">→ doi</a>}
         </div>
       </div>
     ))}
@@ -69,13 +168,11 @@ const dataReleases = [
   <TerminalFrame title="presentations">
     {presentations.map(p => (
       <div class="pub-item">
-        <div class="pub-header">
-          <span class="pub-title">{p.title}</span>
-          <time class="year muted">{p.year}</time>
-        </div>
+        <span class="pub-title">{p.title}</span>
         <div class="pub-footer">
           <span class="venue">{p.venue}</span>
-          <a href={p.link} class="pub-link">→ slides</a>
+          <time class="year muted">{p.year}</time>
+          {p.link && <a href={p.link} class="pub-link" target="_blank" rel="noopener">→ slides</a>}
         </div>
       </div>
     ))}
@@ -84,13 +181,11 @@ const dataReleases = [
   <TerminalFrame title="data-releases">
     {dataReleases.map(d => (
       <div class="pub-item">
-        <div class="pub-header">
-          <span class="pub-title">{d.title}</span>
-          <time class="year muted">{d.year}</time>
-        </div>
+        <span class="pub-title">{d.title}</span>
         <p class="pub-desc muted">{d.description}</p>
         <div class="pub-footer">
-          <a href={d.link} class="pub-link">→ repository</a>
+          <time class="year muted">{d.year}</time>
+          {d.link && <a href={d.link} class="pub-link" target="_blank" rel="noopener">→ repository</a>}
         </div>
       </div>
     ))}
@@ -126,14 +221,6 @@ const dataReleases = [
 
   :global(.frame .body) > .pub-item + .pub-item {
     padding-top: 0.75rem;
-  }
-
-  .pub-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
-    flex-wrap: wrap;
   }
 
   .pub-title {
