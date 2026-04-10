@@ -1,0 +1,109 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
+
+const studies = [
+  {
+    title: "Naroditsky\'s Best Games",
+    description: 'Daniel Naroditsky, gone too soon. A study of some of his highlight games.',
+    link: 'https://lichess.org/study/s6JNESzr',
+  },
+  {
+    title: 'Scotch Gambit',
+    description: 'The first e4 opening I\'m learning. Pretty fun and low elo players often make "obvious" moves that are mistakes.',
+    link: 'https://lichess.org/study/d05kyFwr',
+  },
+  {
+    title: 'Dutch Defense',
+    description: 'Another good d4 response. Can be tricky but often white doesn\'t defend properly and you can get good positions.',
+    link: 'https://lichess.org/study/A9yWaS9j',
+  },
+  {
+    title: 'Annotated Nimzo Indian Games',
+    description: 'Helpful annotated high-level games in the Nimzo.',
+    link: 'https://lichess.org/study/8IbZHwn7',
+  },
+  {
+    title: 'Anti-London Study',
+    description: 'I swear I\'m not a London hater, but this is all everyone plays at club. Time to shut it down.',
+    link: 'https://lichess.org/study/lEFx0DwF'
+  },
+];
+---
+
+<Layout title="chess" path="/chess">
+  <h2 class="page-title">chess</h2>
+  <p class="page-sub muted">studies and opening prep.</p>
+
+  <TerminalFrame title="studies">
+    {studies.map(s => (
+      <div class="study-item">
+        <div class="study-header">
+          <span class="study-title">{s.title}</span>
+          <a href={s.link} class="study-link" target="_blank" rel="noopener">→ open</a>
+        </div>
+        {s.description && <p class="study-desc muted">{s.description}</p>}
+      </div>
+    ))}
+  </TerminalFrame>
+</Layout>
+
+<style>
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .page-sub {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .muted { color: var(--fg-muted); }
+
+  .study-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .study-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  :global(.frame .body) > .study-item + .study-item {
+    padding-top: 0.75rem;
+  }
+
+  .study-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .study-title {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .study-desc {
+    font-size: 0.85rem;
+    line-height: 1.65;
+  }
+
+  .study-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .study-link:hover {
+    color: var(--accent-bright);
+  }
+</style>
