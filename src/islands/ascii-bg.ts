@@ -85,6 +85,12 @@ function init() {
   resize();
   window.addEventListener('resize', resize);
 
+  // Cursor tracking in grid-cell coordinates
+  let mouseCol = -9999;
+  let mouseRow = -9999;
+  const PERTURB_RADIUS   = 70;   // cells
+  const PERTURB_STRENGTH = 10;  // how far the sample point is pushed
+
   let rafId: number;
 
   function frame(t: number) {
@@ -94,7 +100,19 @@ function init() {
     for (let y = 0; y < rows; y++) {
       const row: string[][] = [[], [], []];
       for (let x = 0; x < cols; x++) {
-        const b = [0, 1, 2].map(l => sample(x, y, t, l));
+        // Radial cursor perturbation: push sample point away from cursor
+        let px = x, py = y;
+        const dx = x - mouseCol;
+        const dy = y - mouseRow;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < PERTURB_RADIUS && dist > 0.01) {
+          const falloff = 1 - dist / PERTURB_RADIUS;
+          const push = PERTURB_STRENGTH * falloff * falloff;
+          px = x + (dx / dist) * push;
+          py = y + (dy / dist) * push;
+        }
+
+        const b = [0, 1, 2].map(l => sample(px, py, t, l));
         const winner = b[1] > b[0] ? (b[2] > b[1] ? 2 : 1) : (b[2] > b[0] ? 2 : 0);
         for (let l = 0; l < 3; l++) {
           row[l].push(l === winner ? charFor(b[l]) : ' ');
@@ -111,9 +129,16 @@ function init() {
   rafId = requestAnimationFrame(frame);
 
   // Clean up on Astro page transitions
+  function onMouseMove(e: MouseEvent) {
+    mouseCol = e.clientX / charW;
+    mouseRow = e.clientY / charH;
+  }
+  document.addEventListener('mousemove', onMouseMove);
+
   document.addEventListener('astro:before-swap', () => {
     cancelAnimationFrame(rafId);
     window.removeEventListener('resize', resize);
+    document.removeEventListener('mousemove', onMouseMove);
   }, { once: true });
 }
 
