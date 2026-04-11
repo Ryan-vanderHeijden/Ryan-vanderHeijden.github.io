@@ -88,8 +88,8 @@ function init() {
   // Cursor tracking in grid-cell coordinates
   let mouseCol = -9999;
   let mouseRow = -9999;
-  const PERTURB_RADIUS   = 70;   // cells
-  const PERTURB_STRENGTH = 10;  // how far the sample point is pushed
+  const PERTURB_RADIUS   = 250;   // cells
+  const PERTURB_STRENGTH = 8;  // how far the sample point is pushed
 
   let rafId: number;
 
