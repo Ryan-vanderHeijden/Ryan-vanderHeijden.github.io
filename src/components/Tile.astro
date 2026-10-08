@@ -4,19 +4,21 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   entry: CollectionEntry<'gallery'>;
+  /** spans the full row of its section */
+  lead?: boolean;
 }
 
-const { entry } = Astro.props;
+const { entry, lead = false } = Astro.props;
 const { data } = entry;
 const href = data.kind === 'scrolly' && data.href ? data.href : `/work/${entry.id}/`;
 ---
 
-<a class="tile" href={href}>
+<a class:list={['tile', { lead }]} href={href}>
   <Picture
     src={data.image}
     alt={data.alt}
-    widths={[640, 960, 1400]}
-    sizes="(min-width: 960px) 40vw, 100vw"
+    widths={[640, 960, 1400, 2000]}
+    sizes={lead ? '(min-width: 960px) 80vw, 100vw' : '(min-width: 960px) 40vw, 100vw'}
     formats={['avif', 'webp']}
     fallbackFormat="webp"
   />
@@ -30,7 +32,7 @@ const href = data.kind === 'scrolly' && data.href ? data.href : `/work/${entry.i
   .tile { display: block; text-decoration: none; color: inherit; }
   .tile :global(img) { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
   .label { display: block; padding-top: 0.75rem; max-width: 34rem; }
-  .title { display: block; color: var(--ink); font-size: 1.125rem; }
-  .summary { display: block; color: var(--muted); font-size: 0.9375rem; line-height: 1.5; margin-top: 0.15rem; }
+  .title { display: block; color: var(--ink); font-size: var(--t-title); }
+  .summary { display: block; color: var(--muted); font-size: var(--t-small); line-height: 1.5; margin-top: 0.15rem; }
   .tile:hover .title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 </style>

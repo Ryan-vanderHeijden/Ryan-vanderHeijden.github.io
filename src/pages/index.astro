@@ -50,7 +50,7 @@ const sections = SERIES.map((s) => ({
           <p>{s.blurb}</p>
         </div>
         <div class="grid">
-          {s.entries.map((e) => <Tile entry={e} />)}
+          {s.entries.map((e, i) => <Tile entry={e} lead={i === 0 && s.entries.length % 2 === 1} />)}
         </div>
       </section>
     ))}
@@ -60,20 +60,20 @@ const sections = SERIES.map((s) => ({
 <style>
   /* Intro, picture and label share one screen. The picture is black at its edges, so it
      is letterboxed (contain) into the viewport and bleeds into the page without a frame. */
-  .top { position: relative; min-height: 100svh; }
+  .top { position: relative; min-height: min(100svh, 62.5vw); }  /* never taller than the 16:10 picture */
   .intro {
     position: relative;
     z-index: 1;
     padding: clamp(1.5rem, 5vw, 4rem) var(--gutter) 0;
   }
   .intro h1 {
-    font-size: clamp(2.6rem, 7.5vw, 6.5rem);
+    font-size: var(--t-display);
     font-weight: 300;
     letter-spacing: -0.025em;
     line-height: 0.98;
     max-width: 10ch;
   }
-  .intro p { margin-top: 1rem; color: var(--muted); font-size: clamp(1rem, 1.6vw, 1.25rem); max-width: 30rem; }
+  .intro p { margin-top: 1rem; color: var(--muted); font-size: var(--t-title); max-width: 30rem; }
   .intro nav { position: absolute; top: clamp(1.5rem, 5vw, 4rem); right: var(--gutter); }
   .intro nav a { color: var(--muted); text-decoration: none; }
   .intro nav a:hover { color: var(--ink); }
@@ -92,7 +92,7 @@ const sections = SERIES.map((s) => ({
     bottom: clamp(1.5rem, 5vw, 4rem);
     max-width: 22rem;
   }
-  .hero-label h2 { font-size: clamp(1.5rem, 2.6vw, 2.25rem); }
+  .hero-label h2 { font-size: var(--t-h2); }
   .hero-label p { margin-top: 0.5rem; color: var(--muted); }
   .start { display: inline-block; margin-top: 1rem; color: var(--ink); }
 
@@ -122,8 +122,8 @@ const sections = SERIES.map((s) => ({
     padding-top: clamp(4rem, 9vw, 8rem);
   }
   .series-head { position: sticky; top: 2rem; align-self: start; }
-  .series-head h2 { font-size: clamp(1.5rem, 2.4vw, 2rem); }
-  .series-head p { margin-top: 0.6rem; color: var(--muted); font-size: 0.9375rem; line-height: 1.55; }
+  .series-head h2 { font-size: var(--t-h2); }
+  .series-head p { margin-top: 0.6rem; color: var(--muted); font-size: var(--t-small); line-height: 1.55; }
   .grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -133,6 +133,8 @@ const sections = SERIES.map((s) => ({
     .series { grid-template-columns: 1fr; }
     .series-head { position: static; max-width: var(--measure); }
   }
+  /* in a section with an odd count, the lead picture takes the full row */
+  .grid > :global(.lead) { grid-column: 1 / -1; }
   @media (max-width: 640px) {
     .grid { grid-template-columns: 1fr; }
   }
