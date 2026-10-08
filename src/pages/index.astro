@@ -1,86 +1,139 @@
 ---
+import { Picture } from 'astro:assets';
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import TerminalFrame from '../components/TerminalFrame.astro';
+import Tile from '../components/Tile.astro';
+import { SERIES } from '../series';
+
+const all = (await getCollection('gallery')).sort((a, b) => a.data.order - b.data.order);
+const feature = all.find((e) => e.data.kind === 'scrolly');
+const sections = SERIES.map((s) => ({
+  ...s,
+  entries: all.filter((e) => e.data.series === s.id && e !== feature),
+})).filter((s) => s.entries.length);
 ---
 
-<Layout title="home" path="/">
-  <section class="hero">
-    <h1><span class="accent">ryan</span>.dev</h1>
-    <p class="tagline">PhD · water resources · machine learning · complex systems</p>
-  </section>
+<Layout bare>
+  <div class="top">
+  <header class="intro">
+    <h1>Ryan van der Heijden</h1>
+    <p>Rivers, rain and drought in the United States, computed from data and drawn as light.</p>
+    <nav aria-label="Site"><a href="/about/">About</a></nav>
+  </header>
 
-  <TerminalFrame title="whoami">
-    <dl class="info-grid">
-      <dt>name</dt>
-      <dd>Ryan van der Heijden</dd>
+  {feature && (
+    <section class="hero" aria-labelledby="feature-title">
+      <Picture
+        src={feature.data.image}
+        alt={feature.data.alt}
+        widths={[960, 1600, 2560]}
+        sizes="100vw"
+        formats={['avif', 'webp']}
+        fallbackFormat="webp"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <div class="hero-label">
+        <h2 id="feature-title">{feature.data.title}</h2>
+        <p>{feature.data.summary}</p>
+        <a class="start" href={feature.data.href}>Start the walkthrough</a>
+      </div>
+    </section>
+  )}
+  </div>
 
-      <dt>role</dt>
-      <dd>researcher &amp; scientist</dd>
-
-      <dt>focus</dt>
-      <dd>water resources · machine learning · complex systems</dd>
-
-      <dt>status</dt>
-      <dd class="green">open to collaboration</dd>
-
-      <dt>github</dt>
-      <dd><a href="https://github.com/Ryan-vanderHeijden" target="_blank" rel="noopener">Ryan-vanderHeijden</a></dd>
-
-      <dt>linkedin</dt>
-      <dd><a href="https://www.linkedin.com/in/ryan-van-der-heijden/" target="_blank" rel="noopener">ryan-van-der-heijden</a></dd>
-    </dl>
-  </TerminalFrame>
-
-  <TerminalFrame title="./intro">
-    <p>
-      PhD researcher working at the intersection of
-      <span class="accent">hydrology</span>,
-      <span class="accent">machine learning</span>, and
-      <span class="accent">complex systems science</span>.
-    </p>
-    <p class="muted">
-      [Placeholder — add a sentence or two about your institution,
-      current research, or what you&apos;re excited about.]
-    </p>
-  </TerminalFrame>
-
+  <main>
+    {sections.map((s) => (
+      <section class="series" aria-labelledby={`s-${s.id}`}>
+        <div class="series-head">
+          <h2 id={`s-${s.id}`}>{s.title}</h2>
+          <p>{s.blurb}</p>
+        </div>
+        <div class="grid">
+          {s.entries.map((e) => <Tile entry={e} />)}
+        </div>
+      </section>
+    ))}
+  </main>
 </Layout>
 
 <style>
-  .hero {
-    margin-bottom: 2rem;
+  /* Intro, picture and label share one screen. The picture is black at its edges, so it
+     is letterboxed (contain) into the viewport and bleeds into the page without a frame. */
+  .top { position: relative; min-height: 100svh; }
+  .intro {
+    position: relative;
+    z-index: 1;
+    padding: clamp(1.5rem, 5vw, 4rem) var(--gutter) 0;
+  }
+  .intro h1 {
+    font-size: clamp(2.6rem, 7.5vw, 6.5rem);
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    line-height: 0.98;
+    max-width: 10ch;
+  }
+  .intro p { margin-top: 1rem; color: var(--muted); font-size: clamp(1rem, 1.6vw, 1.25rem); max-width: 30rem; }
+  .intro nav { position: absolute; top: clamp(1.5rem, 5vw, 4rem); right: var(--gutter); }
+  .intro nav a { color: var(--muted); text-decoration: none; }
+  .intro nav a:hover { color: var(--ink); }
+
+  .hero { position: absolute; inset: 0; overflow: hidden; }
+  .hero :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    animation: expose 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) both;
+  }
+  .hero-label {
+    position: absolute;
+    z-index: 1;
+    left: var(--gutter);
+    bottom: clamp(1.5rem, 5vw, 4rem);
+    max-width: 22rem;
+  }
+  .hero-label h2 { font-size: clamp(1.5rem, 2.6vw, 2.25rem); }
+  .hero-label p { margin-top: 0.5rem; color: var(--muted); }
+  .start { display: inline-block; margin-top: 1rem; color: var(--ink); }
+
+  /* the one moment of motion: the picture develops out of black, like a long exposure */
+  @keyframes expose {
+    from { filter: brightness(0); }
+    to { filter: brightness(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero :global(img) { animation: none; }
   }
 
-  .hero h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 0.35rem;
+  /* On a phone the ring would be tiny, so the page flows: crop in on the ring and put
+     the label below it. */
+  @media (max-width: 700px) {
+    .top { min-height: 0; }
+    .hero { position: static; }
+    .hero :global(img) { width: 180%; height: auto; max-width: none; margin-left: -40%; }
+    .hero-label { position: static; padding: 0 var(--gutter); max-width: none; }
   }
 
-  .tagline {
-    color: var(--fg-muted);
-    font-size: 0.95rem;
-  }
-
-  .accent { color: var(--accent); }
-  .green  { color: var(--green);  }
-  .muted  { color: var(--fg-muted); }
-
-  /* info grid inside whoami frame */
-  .info-grid {
+  main { padding: 0 var(--gutter); }
+  .series {
     display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 0.3rem 2rem;
-    font-size: 0.9rem;
+    grid-template-columns: minmax(12rem, 16rem) 1fr;
+    gap: 2rem clamp(2rem, 4vw, 4rem);
+    padding-top: clamp(4rem, 9vw, 8rem);
   }
-
-  .info-grid dt {
-    color: var(--fg-muted);
+  .series-head { position: sticky; top: 2rem; align-self: start; }
+  .series-head h2 { font-size: clamp(1.5rem, 2.4vw, 2rem); }
+  .series-head p { margin-top: 0.6rem; color: var(--muted); font-size: 0.9375rem; line-height: 1.55; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2.5rem, 4vw, 3.5rem) clamp(1.25rem, 2.5vw, 2rem);
   }
-
-  /* spacing between paragraphs inside intro frame */
-  :global(.frame .body p + p) {
-    margin-top: 0.75rem;
+  @media (max-width: 960px) {
+    .series { grid-template-columns: 1fr; }
+    .series-head { position: static; max-width: var(--measure); }
   }
-
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+  }
 </style>

@@ -1,0 +1,94 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { SERIES } from '../../series';
+
+export async function getStaticPaths() {
+  const order = SERIES.map((s) => s.id);
+  const pieces = (await getCollection('gallery', (e) => e.data.kind === 'image')).sort(
+    (a, b) => order.indexOf(a.data.series) - order.indexOf(b.data.series) || a.data.order - b.data.order,
+  );
+  return pieces.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, prev: pieces[i - 1], next: pieces[i + 1] },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const full = await getImage({ src: data.image, format: 'webp', quality: 90 });
+const series = SERIES.find((s) => s.id === data.series);
+---
+
+<Layout title={data.title} description={data.summary}>
+  <main>
+    <figure class="plate">
+      <Picture
+        src={data.image}
+        alt={data.alt}
+        widths={[960, 1600, 2560]}
+        sizes="100vw"
+        formats={['avif', 'webp']}
+        fallbackFormat="webp"
+        loading="eager"
+      />
+    </figure>
+
+    <article class="label">
+      <div class="head">
+        <p class="series">{series?.title}</p>
+        <h1>{data.title}</h1>
+        <p class="lede">{data.summary}</p>
+      </div>
+      <div class="body">
+        <Content />
+        <p class="source"><span>Data:</span> {data.source}</p>
+        {data.note && <p class="note">{data.note}</p>}
+        <p class="full"><a href={full.src}>Open the full-size image</a> ({data.image.width} &times; {data.image.height})</p>
+      </div>
+    </article>
+
+    <nav class="pager" aria-label="More pictures">
+      {prev ? <a rel="prev" href={`/work/${prev.id}/`}><span>Previous</span>{prev.data.title}</a> : <span />}
+      {next ? <a rel="next" href={`/work/${next.id}/`}><span>Next</span>{next.data.title}</a> : <span />}
+    </nav>
+  </main>
+</Layout>
+
+<style>
+  .plate { margin: 0; }
+  .plate :global(img) { width: 100%; max-height: calc(100svh - 4.5rem); object-fit: contain; }
+
+  .label {
+    display: grid;
+    grid-template-columns: minmax(14rem, 22rem) minmax(0, var(--measure));
+    gap: 1.5rem clamp(2rem, 5vw, 5rem);
+    padding: clamp(2rem, 5vw, 4rem) var(--gutter) 0;
+  }
+  .series { color: var(--muted); font-size: 0.9375rem; }
+  h1 { margin-top: 0.3rem; font-size: clamp(1.9rem, 3.4vw, 2.75rem); font-weight: 300; letter-spacing: -0.015em; }
+  .lede { margin-top: 0.9rem; color: var(--muted); }
+  .body { line-height: 1.7; }
+  .source, .note, .full { margin-top: 1.5rem; font-size: 0.9375rem; color: var(--muted); }
+  .source span { font-style: italic; }
+  .note, .full { margin-top: 0.5rem; }
+
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-top: clamp(3rem, 7vw, 6rem);
+    padding: 1.5rem var(--gutter) 0;
+    border-top: 1px solid var(--rule);
+  }
+  .pager a { color: var(--ink); text-decoration: none; }
+  .pager a:hover { text-decoration: underline; }
+  .pager a span { display: block; color: var(--faint); font-size: 0.875rem; }
+  .pager a[rel='next'] { text-align: right; }
+
+  @media (max-width: 820px) {
+    .label { grid-template-columns: 1fr; }
+  }
+</style>

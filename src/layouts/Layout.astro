@@ -1,95 +1,77 @@
 ---
-import Nav from '../components/Nav.astro';
 import '../styles/global.css';
 
 interface Props {
-  title: string;
-  path?: string;
+  title?: string;
+  description?: string;
+  /** the home page draws its own header over the hero image */
+  bare?: boolean;
 }
 
-const { title, path = '/' } = Astro.props;
+const NAME = 'Ryan van der Heijden';
+const {
+  title,
+  description = 'Pictures of U.S. rivers, rain and drought, made from data and drawn as light.',
+  bare = false,
+} = Astro.props;
+const path = Astro.url.pathname;
 ---
 
 <!doctype html>
-<html lang="en" data-palette="RV Default">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} — ryan.dev</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title ? `${title} | ${NAME}` : NAME}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..600;1,7..72,300..400&display=swap"
     />
-    <!-- Single source of truth for palettes; used by both FOUC-prevention and toggle -->
-    <script is:inline>
-      window.PALETTES = [
-        { id: 'RV Default', color: '#ff79c6', label: 'RV Default' },
-        { id: 'Graham',     color: '#c85000', label: 'Graham'     },
-        { id: 'Shoyu',      color: '#a87c5a', label: 'Shoyu'      },
-        { id: 'synthwave',  color: '#ff2a6d', label: 'Synthwave'  },
-        { id: 'dark',       color: '#58a6ff', label: 'Dark'       },
-      ];
-
-      // Prevent palette flash before paint
-      const saved = localStorage.getItem('palette');
-      if (saved && window.PALETTES.some(p => p.id === saved)) {
-        document.documentElement.dataset.palette = saved;
-      }
-    </script>
   </head>
   <body>
-    <div id="ascii-bg" aria-hidden="true"></div>
-    <div class="site-container">
+    {!bare && (
       <header class="site-header">
-        <Nav path={path} />
-        <div class="palette-toggle" id="palette-toggle"></div>
+        <a class="home" href="/">{NAME}</a>
+        <nav aria-label="Site">
+          <a href="/" aria-current={path === '/' ? 'page' : undefined}>Gallery</a>
+          <a href="/about/" aria-current={path === '/about/' ? 'page' : undefined}>About</a>
+        </nav>
       </header>
-
-      <main class="site-main">
-        <slot />
-      </main>
-
-      <footer class="site-footer">
-        <span>© 2026 Ryan van der Heijden</span>
-        <span>·</span>
-        <a href="https://github.com/Ryan-vanderHeijden" target="_blank" rel="noopener">github</a>
-        <span>·</span>
-        <a href="https://www.linkedin.com/in/ryan-van-der-heijden/" target="_blank" rel="noopener">linkedin</a>
-        <span>·</span>
-        <span>no cookies · no analytics · no tracking</span>
-      </footer>
-    </div>
-
-    <script is:inline>
-      function renderToggle() {
-        const current = document.documentElement.dataset.palette;
-        const el = document.getElementById('palette-toggle');
-        if (!el) return;
-        el.innerHTML = window.PALETTES.map(p =>
-          `<button
-            class="palette-btn${p.id === current ? ' active' : ''}"
-            data-palette="${p.id}"
-            title="${p.label}"
-            style="background:${p.color}"
-          ></button>`
-        ).join('');
-        el.querySelectorAll('.palette-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const p = btn.dataset.palette;
-            document.documentElement.dataset.palette = p;
-            localStorage.setItem('palette', p);
-            renderToggle();
-          });
-        });
-      }
-
-      document.addEventListener('DOMContentLoaded', renderToggle);
-    </script>
-
-    <script>
-      import '../islands/ascii-bg';
-    </script>
+    )}
+    <slot />
+    <footer class="site-footer">
+      <span>&copy; {new Date().getFullYear()} {NAME}</span>
+      <a href="https://github.com/Ryan-vanderHeijden">GitHub</a>
+    </footer>
   </body>
 </html>
+
+<style is:global>
+  .site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 1.25rem var(--gutter);
+  }
+  .site-header .home { color: var(--ink); text-decoration: none; }
+  .site-header nav { display: flex; gap: 1.5rem; }
+  .site-header nav a { color: var(--muted); text-decoration: none; }
+  .site-header nav a:hover,
+  .site-header nav a[aria-current='page'] { color: var(--ink); }
+
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 4rem var(--gutter) 2rem;
+    color: var(--faint);
+    font-size: 0.875rem;
+  }
+  .site-footer a { color: var(--muted); }
+</style>

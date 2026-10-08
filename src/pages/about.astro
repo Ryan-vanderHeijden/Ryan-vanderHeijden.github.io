@@ -1,80 +1,72 @@
 ---
+import { Picture } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
-import TerminalFrame from '../components/TerminalFrame.astro';
+import portrait from '../assets/gallery/rivers-ne.webp';
 ---
 
-<Layout title="about" path="/about">
-  <h2 class="page-title">about</h2>
+<Layout title="About" description="About Ryan van der Heijden, a hydrology researcher at the University of Vermont.">
+  <main class="about">
+    <div class="text">
+      <h1>About</h1>
+      <p>
+        I'm a postdoctoral associate at the University of Vermont, where I work on water resources,
+        machine learning and complex systems. My research is part of the Cooperative Institute for
+        Research to Operations in Hydrology (CIROH), a NOAA-funded consortium of government, academic
+        and private partners working to improve national water modeling.
+      </p>
+      <p>
+        The pictures in this gallery come out of that work. Each one is computed from real records,
+        mostly USGS streamgages and gridded rainfall, and drawn as light on a black background, so
+        places where many rivers or storms agree glow brighter. Color always stands for a variable.
+      </p>
 
-  <TerminalFrame title="bio">
-    <p>
-      <strong class="accent">Ryan van der Heijden</strong> is a researcher
-      specializing in water resources, machine learning, and complex systems science.
-    </p>
-    <p class="muted">
-      Postdoctoral associate at the University of Vermont, working with the Cooperative Institute for Research to Operations in Hydrology, and NOAA funded consortium of government, academic, and private entities striving to improve the state-of-science in national water modeling.
-    </p>
-  </TerminalFrame>
+      <h2>Research interests</h2>
+      <ul>
+        <li>Hydrological modeling and prediction</li>
+        <li>Machine learning for environmental science</li>
+        <li>Complex systems and network dynamics</li>
+      </ul>
 
-  <TerminalFrame title="research interests">
-    <ul class="list">
-      <li><span class="bullet">›</span> Hydrological modelling and prediction</li>
-      <li><span class="bullet">›</span> Machine learning for environmental science</li>
-      <li><span class="bullet">›</span> Complex systems and network dynamics</li>
-      <li><span class="bullet">›</span> [still adding stuff!]</li>
-    </ul>
-  </TerminalFrame>
-
-  <TerminalFrame title="contact">
-    <dl class="contact-grid">
-      <dt>email</dt>
-      <dd><a href="mailto:rvanderh@uvm.edu">email me</a></dd>
-
-      <dt>github</dt>
-      <dd><a href="https://github.com/Ryan-vanderHeijden" target="_blank" rel="noopener">Ryan-vanderHeijden</a></dd>
-
-      <dt>linkedin</dt>
-      <dd><a href="https://www.linkedin.com/in/ryan-van-der-heijden/" target="_blank" rel="noopener">ryan-van-der-heijden</a></dd>
-
-      <dt>scholar</dt>
-      <dd><a href="https://scholar.google.com/citations?user=aZ0-0SsAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a></dd>
-
-      <dt>orcid</dt>
-      <dd><a href="#" target="_blank" rel="noopener">0000-0003-1320-9500</a></dd>
-    </dl>
-  </TerminalFrame>
+      <h2>Contact</h2>
+      <dl>
+        <dt>Email</dt><dd><a href="mailto:rvanderh@uvm.edu">rvanderh@uvm.edu</a></dd>
+        <dt>GitHub</dt><dd><a href="https://github.com/Ryan-vanderHeijden">Ryan-vanderHeijden</a></dd>
+        <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/ryan-van-der-heijden/">ryan-van-der-heijden</a></dd>
+        <dt>Scholar</dt><dd><a href="https://scholar.google.com/citations?user=aZ0-0SsAAAAJ&hl=en">Google Scholar</a></dd>
+        <dt>ORCID</dt><dd><a href="https://orcid.org/0000-0003-1320-9500">0000-0003-1320-9500</a></dd>
+      </dl>
+    </div>
+    <Picture
+      class="side"
+      src={portrait}
+      alt="The stream network of New England in violet, with the main rivers glowing cyan."
+      widths={[640, 1200]}
+      sizes="(min-width: 960px) 45vw, 100vw"
+      formats={['avif', 'webp']}
+    fallbackFormat="webp"
+    />
+  </main>
 </Layout>
 
 <style>
-  .page-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .accent { color: var(--accent); }
-  .muted  { color: var(--fg-muted); }
-  .bullet { color: var(--accent); margin-right: 0.5ch; }
-
-  :global(.frame .body p + p) {
-    margin-top: 0.75rem;
-  }
-
-  .list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    font-size: 0.9rem;
-  }
-
-  .contact-grid {
+  .about {
     display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 0.4rem 2rem;
-    font-size: 0.9rem;
+    grid-template-columns: minmax(0, var(--measure)) 1fr;
+    gap: 2rem clamp(2rem, 5vw, 5rem);
+    padding: clamp(1.5rem, 4vw, 3rem) var(--gutter) 0;
+    align-items: start;
   }
-
-  .contact-grid dt {
-    color: var(--fg-muted);
+  h1 { font-size: clamp(2.2rem, 4.5vw, 3.5rem); font-weight: 300; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+  h2 { font-size: 1.25rem; margin: 2.5rem 0 0.75rem; }
+  ul { margin: 0; padding-left: 1.1rem; }
+  li + li { margin-top: 0.3rem; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.5rem; margin: 0; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  .about :global(.side) { position: sticky; top: 2rem; }
+  .about :global(.side img), .about :global(img.side) { width: 100%; height: auto; }
+  @media (max-width: 960px) {
+    .about { grid-template-columns: 1fr; }
+    .about :global(.side) { position: static; }
   }
 </style>

@@ -1,59 +1,32 @@
 # ryan-vanderheijden.github.io
 
-Personal website of Ryan van der Heijden — postdoctoral researcher at the University of Vermont working on water resources, machine learning, and complex systems science.
+A gallery of data images and scroll stories, plus an about page. Built with
+[Astro](https://astro.build) and deployed to GitHub Pages by `.github/workflows/deploy.yml`
+on every push to `main`.
 
-Built with [Astro](https://astro.build) and deployed to GitHub Pages.
+## Adding a picture
 
-## Stack
+1. Add `src/content/gallery/<slug>.md`. Copy an existing entry: `original` names the render
+   in `~/projects/backgrounds/out`, and `image` points at `../../assets/gallery/<slug>.webp`.
+   The markdown body is the caption on the picture's own page.
+2. `npm run import-images` makes the 2560 px web master (about 0.3 MB) from the 4K render.
+   Set `RENDERS=/path` for a different source folder, and pass `-- --force` to redo one.
+3. `npm run dev` and check http://localhost:4321.
 
-- **Framework**: Astro 6 (static output)
-- **Fonts**: Roboto Mono (Google Fonts)
-- **Styling**: vanilla CSS with custom themes and palettes
-- **Deployment**: GitHub Actions → GitHub Pages
+Sections and their order are in `src/series.ts`.
 
-## Structure
+## Scroll stories
 
-```
-src/
-├── components/
-│   ├── Nav.astro           # terminal-style breadcrumb nav
-│   └── TerminalFrame.astro # bordered terminal-style content box
-├── islands/
-│   └── ascii-bg.ts         # animated ASCII background
-├── layouts/
-│   └── Layout.astro        # shared page shell
-├── pages/
-│   ├── index.astro
-│   ├── about.astro
-│   ├── projects.astro
-│   └── blog/index.astro
-└── styles/
-    ├── global.css
-    └── palettes.css        # color themes
-```
-
-## Themes
-
-Five color palettes, toggleable via the dots in the top-right corner. Preference is saved to `localStorage`.
-
-| Name       | Vibe        |
-|------------|-------------|
-| RV Default | pink/purple |
-| Graham     | orange/gold |
-| Shoyu      | warm brown  |
-| Synthwave  | pink/red    |
-| Dark       | blue/gray   |
+Standalone pages live in `public/scrolly/<slug>/` and are served as they are. Add a gallery
+entry with `kind: scrolly` and `href: /scrolly/<slug>/`; it takes the hero slot on the home page.
+`river-calendars` is a copy of `~/projects/backgrounds/scrolly/` (`index.html` and `data.js`),
+so copy it again after changing it there.
 
 ## Development
 
-```bash
+```sh
 npm install
-npm run dev      # localhost:4321
-npm run build    # output to ./dist
-npm run preview  # preview the build
+npm run dev       # localhost:4321
+npm run build     # to ./dist
+npm run preview
 ```
-
-## Deployment
-
-Pushes to `main` automatically deploy via `.github/workflows/deploy.yml`.
-In the repo settings, ensure **Pages → Source** is set to **GitHub Actions**.

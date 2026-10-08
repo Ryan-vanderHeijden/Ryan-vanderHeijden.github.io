@@ -1,0 +1,952 @@
+ <!-- http://127.0.0.1:3001/scrolly/index.html?tune=&exposure=1.4&gamma=0.96&saturation=1.05&floor=4&bloom=2:0.2,20:0.2 -->
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>River Calendars</title>
+<meta name="description" content="A scrolling walkthrough of the annual flow regimes of 7,394 U.S. rivers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400&family=Fira+Mono&display=swap">
+<style>
+/* Layout: one sticky full-viewport graphic (WebGL loops + SVG annotation) with text scrolling over it,
+   in a left column on wide screens and along the bottom on phones. True black by design: the loops are
+   light added to black, as on the OLED wallpapers. Text sits on a feathered black pad, not a box; its
+   left rule takes the season color of the step (data-phase), and stays neutral when a step has none. */
+:root {
+  --bg: #000;
+  --ink: #e8e4da;
+  --body-ink: #d6d2c8;
+  --muted: #9a978f;
+  --faint: #5d5b56;
+  --rule: #2a2926;
+  --pad: rgba(0, 0, 0, 0.72);
+  --serif: "Literata", Georgia, "Times New Roman", serif;
+  --mono: "Fira Mono", ui-monospace, Menlo, Consolas, monospace;
+  --col: 400px;   /* keep in sync with the plot inset in layout() */
+  color-scheme: dark;
+}
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--serif);
+  font-variant-numeric: oldstyle-nums proportional-nums; }
+
+.scrolly { position: relative; }
+.graphic { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.graphic canvas, .graphic svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#ov { overflow: visible; }
+#ov text { font-family: var(--serif); fill: var(--muted); font-size: 12px; }
+#ov .ex-label { fill: var(--ink); font-size: 14px; font-weight: 500; }
+#ov .ex-sub { fill: var(--muted); font-size: 12px; font-style: italic; }
+#ov .mono { font-size: 11px; font-variant-numeric: lining-nums tabular-nums; }
+
+/* the year dial: scroll progress, painted in the palette as the page moves through its steps */
+#dial { position: absolute; inset: auto 24px 24px auto; width: 52px; height: 52px; }
+
+.steps { position: relative; margin-top: -100vh; margin-top: -100svh; pointer-events: none;
+  padding-inline: 16px; }
+.step { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; }
+.step:last-child { min-height: 70vh; align-items: flex-start; padding-top: 18vh; }
+.card { pointer-events: auto; box-sizing: border-box; width: 100%; max-width: var(--col);
+  padding: 2px 0 4px 20px; border-left: 2px solid var(--season, var(--rule));
+  background: var(--pad); box-shadow: 0 0 44px 32px var(--pad); }
+.card h2 { font: 500 26px/1.18 var(--serif); margin: 0 0 12px; text-wrap: balance; letter-spacing: -0.005em;
+  font-variant-numeric: lining-nums; }
+.card p { margin: 0; color: var(--body-ink); text-wrap: pretty; }
+.card p + p { margin-top: 0.75em; }
+.card .note { font-size: 15px; line-height: 1.5; color: var(--muted); }
+.intro .card { max-width: 460px; border-left-color: transparent; padding-left: 0; }
+.intro h1 { font: 400 clamp(46px, 7.4vw, 76px)/0.96 var(--serif); margin: 0 0 22px; letter-spacing: -0.02em; }
+.intro .card p { font-size: 19px; line-height: 1.55; }
+.intro .card .scrollcue { margin-top: 20px; font-size: 15px; font-style: italic; color: var(--muted); }
+.swatch { display: inline-block; width: 0.5em; height: 0.5em; border-radius: 50%; margin-right: 0.35em;
+  vertical-align: 0.12em; }
+
+#tip { position: absolute; pointer-events: none; max-width: 300px; background: rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px; font-size: 14px; line-height: 1.4;
+  color: var(--ink); }
+#tip b { font-weight: 500; }
+#tip ul { margin: 6px 0 0; padding-left: 16px; color: var(--muted); }
+#nogl { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); padding: 24px;
+  text-align: center; font-style: italic; }
+
+/* developer panel (?tune / #tune) */
+#tune { position: fixed; top: 12px; right: 12px; z-index: 10; width: 220px; padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.9); border: 1px solid var(--rule); font: 12px/1.3 var(--mono); color: var(--muted); }
+#tune label { display: block; margin: 4px 0; }
+#tune output { float: right; color: var(--ink); }
+#tune input { width: 100%; margin: 2px 0 0; }
+#tune input[type=text] { background: transparent; color: var(--ink); border: 1px solid var(--rule); font: inherit; padding: 3px 5px; box-sizing: border-box; }
+
+footer { position: relative; padding: 72px 16px 96px; border-top: 1px solid var(--rule); background: var(--bg); }
+footer .inner { max-width: 34em; margin: 0 auto; color: var(--muted); font-size: 16px; }
+footer h3 { font: 500 20px/1.2 var(--serif); color: var(--ink); margin: 0 0 12px; }
+footer p { margin: 0 0 0.8em; }
+footer code { font-family: var(--mono); font-size: 0.86em; color: var(--body-ink); }
+
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+@media (min-width: 900px) {
+  .steps { padding-inline: 40px; }
+}
+@media (max-width: 899px) {
+  .step { align-items: flex-end; padding-bottom: 6vh; }
+  .step.intro { align-items: center; }
+  .card { margin-inline: auto; padding-left: 16px; }
+  .card h2 { font-size: 22px; }
+  body { font-size: 16px; }
+  #dial { inset: 14px 14px auto auto; width: 40px; height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<section class="scrolly" id="scrolly">
+  <div class="graphic" id="graphic">
+    <canvas id="gl" aria-hidden="true"></canvas>
+    <svg id="ov" role="img" aria-label="Annual flow loops of U.S. streamgages"></svg>
+    <svg id="dial" viewBox="-26 -26 52 52" aria-hidden="true"></svg>
+    <div id="tip" hidden></div>
+  </div>
+
+  <div class="steps" id="steps">
+    <div class="step intro"><div class="card">
+      <h1>River Calendars</h1>
+      <p>Every river keeps a calendar. Some swell with snowmelt in June, some with winter storms in January,
+        and some barely change all year. This picture holds that calendar for
+        <span class="num" data-fill="n"></span> U.S. rivers, one loop of light per streamgage, each averaged
+        over at least 20 years of daily records.</p>
+      <p class="scrollcue">Scroll to learn how to read it.</p>
+    </div></div>
+
+    <div class="step" data-phase="ys"><div class="card">
+      <h2>Start with one river</h2>
+      <p>The Yellowstone River at Corwin Springs, Montana, just north of the national park. Average every
+        January 1, every January 2, and so on through decades of daily records, and you get its typical year.</p>
+      <p>The dashed line is the river's mean flow, <span class="num" data-fill="ys_cfs"></span> cubic feet per
+        second. Most of the year runs below it. Then snowmelt lifts the river to about
+        <span class="num" data-fill="ys_peak"></span> its mean in June.</p>
+      <p class="note">The vertical scale is logarithmic: each gridline up doubles the flow.</p>
+    </div></div>
+
+    <div class="step" data-phase="ys"><div class="card">
+      <h2>Roll the year into a circle</h2>
+      <p>Now curl the line up so that January 1 sits at the top and the months run clockwise. The dashed mean
+        line becomes a circle. High flow bulges outside it and low flow tucks inside.</p>
+      <p>December now runs straight into January, so the year has no edges and the June snowmelt pulse
+        becomes one big lobe.</p>
+    </div></div>
+
+    <div class="step"><div class="card">
+      <h2>Each river draws its own shape</h2>
+      <p>Coastal Oregon's Nehalem River peaks with winter rain. Maine's Fish River waits for the spring thaw.
+        Texas's Leon River jumps with late-spring storms, and Florida's Fisheating Creek fills in the summer
+        wet season.</p>
+      <p>Etonia Creek in north Florida barely changes through the year, so its loop is almost a perfect
+        circle.</p>
+    </div></div>
+
+    <div class="step"><div class="card">
+      <h2>Color marks when the water comes</h2>
+      <p>Think of each day's flow as an arrow pointing to that day on the clock face. Add them up and the
+        total points to the river's <em>flow-weighted mean date</em>, drawn as the arrow in each loop.</p>
+      <p>The arrow's length shows how concentrated the year is: long for one dominant season, close to
+        zero for a steady river. Each loop takes the color of its date on the ring.</p>
+    </div></div>
+
+    <div class="step"><div class="card">
+      <h2>Now all <span class="num" data-fill="n"></span> rivers at once</h2>
+      <p>Here is every gage with at least 20 years of record, stacked on top of each other and drawn in order
+        of when their water arrives. Where many rivers share a rhythm, the light builds up.</p>
+      <p class="note">Lines are not sized by river: a creek and the Mississippi each count once.</p>
+    </div></div>
+
+    <div class="step" data-phase="0.45"><div class="card">
+      <h2><span class="swatch" data-phase="0.45"></span>The snowmelt rivers</h2>
+      <p><span class="num" data-fill="k_snow"></span> gages have a flow-weighted date between mid-May and
+        mid-July. About <span class="num" data-fill="pct_snow_w"></span> of them sit in the West, where the
+        winter's water waits in the mountains as snow. Many of the rest are Great Plains rivers that peak with
+        late-spring thunderstorms.</p>
+    </div></div>
+
+    <div class="step" data-phase="0.02"><div class="card">
+      <h2><span class="swatch" data-phase="0.02"></span>The winter-water rivers</h2>
+      <p><span class="num" data-fill="k_winter"></span> gages center on December through February. The
+        Pacific coast is here, where storms arrive in winter and summers are dry. So are many rivers of the
+        Southeast and the Ohio Valley, where cool months mean less evaporation and wetter soil.</p>
+    </div></div>
+
+    <div class="step"><div class="card">
+      <h2>The rivers that run all year</h2>
+      <p>Only <span class="num" data-fill="k_steady"></span> gages have almost no seasonal swing (arrow length
+        under 0.15). Something stores water for them and releases it slowly: groundwater, a lake or a
+        reservoir upstream.</p>
+    </div></div>
+
+    <div class="step"><div class="card">
+      <h2>Put each river back on the map</h2>
+      <p>Each loop shrinks and moves to its gage. The outlines are the 18 water-resource regions of the
+        lower 48 (HUC2 basins), drawn whole, so the Columbia, Great Lakes and Rio Grande basins reach into
+        Canada and Mexico.</p>
+    </div></div>
+
+    <div class="step"><div class="card">
+      <h2>Bundle the neighbors</h2>
+      <p>Gages within the same <span data-fill="hexKm"></span> km hexagon now share one center. The
+        regions come out clearly: winter-rain Pacific Northwest, snowmelt Rockies, April-peaking Midwest, a
+        late-winter East, and a Florida that waits for summer rain.</p>
+      <p class="note">Hexagons with a single gage are left out; those with fewer than five are dimmed.</p>
+    </div></div>
+
+    <div class="step"><div class="card">
+      <h2>Explore</h2>
+      <p>Hover over or tap a hexagon to see its gages. Point at the color ring to pick out rivers by when
+        their water arrives.</p>
+    </div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <h3>About the data</h3>
+    <p>Daily discharge from USGS NWIS for every gage with at least 20 years of record. Each gage's mean
+      flow for every day of the year is smoothed over 15 days and divided by the gage's annual mean. A loop's
+      distance from its center is <code>1 + 0.22·log₂(flow / mean)</code>, so the dashed circle is mean flow
+      and every doubling adds 0.22.</p>
+    <p>The flow-weighted mean date and its strength are the direction and length of the sum of daily flows
+      written as unit vectors around the year, divided by total flow. Gage locations come from GAGES-II;
+      basin outlines from the USGS Watershed Boundary Dataset. Colors use the <span data-fill="palette"></span> cyclic map.</p>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.DATA;
+const TAU = Math.PI * 2;
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTH_START = [0,31,59,90,120,151,181,212,243,273,304,334];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- decode ----------
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const R8 = unb64(D.R), PH8 = unb64(D.phase), ST8 = unb64(D.strength);
+const locBytes = unb64(D.loc), LOC = new Float32Array(locBytes.buffer, 0, D.n * 2);
+const hexBytes = unb64(D.hexId), HEXID = new Uint16Array(hexBytes.buffer, 0, D.n);
+const PAL = unb64(D.palette);
+const n = D.n, N = D.N;
+const phase = i => PH8[i] / 255, strength = i => ST8[i] / 255;
+const palRGB = p => { const k = Math.round(((p % 1 + 1) % 1) * 255) % 256; return [PAL[3*k], PAL[3*k+1], PAL[3*k+2]]; };
+const rgbStr = ([r, g, b], a = 1) => `rgba(${r|0},${g|0},${b|0},${a})`;
+const doyLabel = p => { const d = Math.floor(((p % 1 + 1) % 1) * 365);
+  let m = 11; while (MONTH_START[m] > d) m--; return `${MONTHS[m]} ${d - MONTH_START[m] + 1}`; };
+const ratioOf = R => Math.pow(2, (R - 1) / 0.22);
+let maxR = 0; for (let i = 0; i < R8.length; i++) if (R8[i] > maxR) maxR = R8[i];
+maxR = maxR / 255 * D.rMax;
+
+// ---------- numbers quoted in the text ----------
+const fmt = v => v.toLocaleString("en-US");
+const inWin = (p, a, b) => a <= b ? (p >= a && p < b) : (p >= a || p < b);
+const WIN = { snow: [135/365, 196/365], winter: [335/365, 59/365] };
+const STEADY = 0.15;
+let kSnow = 0, kSnowW = 0, kWinter = 0, kSteady = 0;
+for (let i = 0; i < n; i++) {
+  const p = phase(i);
+  if (inWin(p, ...WIN.snow)) kSnow++;
+  if (inWin(p, ...WIN.winter)) kWinter++;
+  if (strength(i) < STEADY) kSteady++;
+}
+const ys = D.examples[0];
+const fills = {
+  n: fmt(n), hexKm: String(D.hexKm), k_snow: fmt(kSnow), k_winter: fmt(kWinter), k_steady: fmt(kSteady),
+  pct_snow_w: "6 in 10", ys_cfs: fmt(Math.round(ys.mean_cfs / 10) * 10),
+  ys_peak: Math.round(ratioOf(Math.max(...ys.R))) + "×",
+  palette: (D.paletteName || "CET_C11").replace("_", "-"),
+};
+document.querySelectorAll("[data-fill]").forEach(el => el.textContent = fills[el.dataset.fill]);
+document.querySelectorAll(".swatch").forEach(el => el.style.background = rgbStr(palRGB(+el.dataset.phase)));
+// each step's left rule takes the color of the season it is about ("ys" = the Yellowstone example)
+document.querySelectorAll(".step[data-phase]").forEach(el => {
+  const p = el.dataset.phase === "ys" ? D.examples[0].phase : +el.dataset.phase;
+  el.style.setProperty("--season", rgbStr(palRGB(p)));
+});
+
+// ---------- scroll position -> scene time s ----------
+const stepEls = [...document.querySelectorAll(".step")];
+function sceneTime() {
+  const trig = innerHeight * 0.55;
+  let s = 0;
+  for (let i = 0; i < stepEls.length; i++) {
+    const r = stepEls[i].getBoundingClientRect();
+    if (r.top <= trig) s = i + Math.min(1, Math.max(0, (trig - r.top) / r.height));
+  }
+  return s;
+}
+const ease = t => t * t * (3 - 2 * t);
+// piecewise keyframes [[s, v], ...] with eased segments
+function kf(s, keys) {
+  if (s <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    const [s1, v1] = keys[i], [s0, v0] = keys[i - 1];
+    if (s <= s1) return v0 + (v1 - v0) * ease((s - s0) / (s1 - s0));
+  }
+  return keys[keys.length - 1][1];
+}
+
+// ---------- layout ----------
+const graphic = document.getElementById("graphic");
+const glCanvas = document.getElementById("gl");
+const svg = document.getElementById("ov"), tip = document.getElementById("tip");
+let L = {};
+function layout() {
+  const W = graphic.clientWidth, H = graphic.clientHeight;
+  const wide = W >= 900;
+  // plot area: right of the text column on wide screens, above the cards on phones
+  const plot = wide ? { x0: 400 + 80, y0: 32, x1: W - 40, y1: H - 32 }
+                    : { x0: 16, y0: 24, x1: W - 16, y1: H * 0.6 };
+  const pw = plot.x1 - plot.x0, ph = plot.y1 - plot.y0;
+  const cx = (plot.x0 + plot.x1) / 2, cy = (plot.y0 + plot.y1) / 2;
+  const crowdScale = Math.min(pw, ph) / 2 / (maxR + 0.16);
+  // map fit (normalized Albers: x 0..1, y 0..aspect)
+  const mScale = Math.min(pw / 1, ph / D.aspect) * 0.98;
+  const mx = cx - mScale / 2, my = cy - mScale * D.aspect / 2;
+  // example grid: 3x2 wide, 2x3 tall
+  const cols = pw >= ph ? 3 : 2, rows = 6 / cols;
+  const cw = pw / cols, ch = ph / rows;
+  const cell = i => ({ x: plot.x0 + cw * (i % cols + 0.5), y: plot.y0 + ch * (Math.floor(i / cols) + 0.5) - 10 });
+  const gridScale = Math.min(cw, ch - 48) / 2 / 1.6;
+  const solo = Math.min(pw, ph) / 2 / 1.75;
+  L = { W, H, wide, plot, pw, ph, cx, cy, crowdScale, mScale, mx, my, cell, gridScale, solo };
+}
+
+// ---------- render settings ----------
+// The same knobs as glow.py's --exposure/--gamma/--saturation/--bloom/--floor, set from the URL:
+// index.html?exposure=1.3&gamma=0.4545&saturation=1.2&bloom=4:0.6,24:0.35&floor=4
+// Bloom sigmas are in 4K-wallpaper pixels (3840 wide), scaled to the canvas, as in ideas.py.
+// Add &tune for a panel of live controls.
+const RENDER = { exposure: 1.4, gamma: 0.96, saturation: 1.05, bloom: "2:0.2,20:0.2", floor: 4 };
+const qs = new URLSearchParams(location.search);
+for (const k in RENDER) if (qs.has(k)) RENDER[k] = k === "bloom" ? qs.get(k) : +qs.get(k);
+const parseBloom = str => str === "none" ? [] : str.split(",").map(pair => pair.split(":").map(Number))
+  .filter(([sg, k]) => sg > 0 && isFinite(k)).slice(0, 4);
+
+// ---------- WebGL ----------
+const gl = glCanvas.getContext("webgl2", { antialias: false, alpha: false, premultipliedAlpha: false });
+
+function shader(type, src) {
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+function program(vs, fs) {
+  const p = gl.createProgram();
+  gl.attachShader(p, shader(gl.VERTEX_SHADER, vs)); gl.attachShader(p, shader(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const u = {}, nu = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < nu; i++) { const name = gl.getActiveUniform(p, i).name; u[name] = gl.getUniformLocation(p, name); }
+  return { p, u };
+}
+
+const LOOPS_VS = `#version 300 es
+precision highp float; precision highp int;
+uniform sampler2D uR; uniform sampler2D uPal;
+uniform int uN; uniform int uPerRow; uniform float uCount; uniform float uRMax;
+uniform vec2 uRes; uniform vec2 uCenter; uniform float uScale;
+uniform vec3 uMap;            // map origin x, y, px per normalized unit
+uniform float uLocScale, uHexScale, uLoc, uHex, uReveal, uAlpha;
+uniform vec3 uGains;          // polar, at gage, hex
+uniform vec3 uWin; uniform vec2 uStr; uniform vec2 uSel;
+in float aVert; in float aPhase; in float aStrength; in vec2 aLoc; in vec2 aHexC; in float aHexGain; in float aHexId;
+out vec3 vCol;
+void main() {
+  int inst = gl_InstanceID;
+  // each loop starts at its own fraction of a sample step, with the radius interpolated between samples;
+  // with every loop's corners at the same N angles, thousands of overlaid loops show faint radial spokes
+  float off = fract(sin(float(inst) * 12.9898) * 43758.5453);
+  float pf = aVert + off;
+  int i0 = int(floor(pf)) % uN, i1 = (i0 + 1) % uN;
+  int row = inst / uPerRow, col = (inst % uPerRow) * uN;
+  float r = mix(texelFetch(uR, ivec2(col + i0, row), 0).r, texelFetch(uR, ivec2(col + i1, row), 0).r, fract(pf)) * uRMax;
+  float th = 6.2831853 * (pf + 0.5) / float(uN);   // sample i averages days 5i..5i+4
+  vec2 dir = vec2(sin(th), -cos(th));
+  vec2 cLoc = uMap.xy + aLoc * uMap.z, cHex = uMap.xy + aHexC * uMap.z;
+  vec2 c = mix(mix(uCenter, cLoc, uLoc), cHex, uHex);
+  float s = mix(mix(uScale, uLocScale, uLoc), uHexScale, uHex);
+  vec2 pos = c + dir * r * s;
+  gl_Position = vec4(pos.x / uRes.x * 2.0 - 1.0, 1.0 - pos.y / uRes.y * 2.0, 0.0, 1.0);
+  float order = float(inst) / uCount;
+  float vis = clamp((uReveal * 1.04 - order) / 0.04, 0.0, 1.0);
+  float gain = mix(mix(uGains.x, uGains.y, uLoc), uGains.z * aHexGain, uHex);
+  float d = abs(fract(aPhase - uWin.x + 0.5) - 0.5);
+  float inW = 1.0 - smoothstep(uWin.y, uWin.y + 0.015, d);
+  float f = mix(1.0, mix(0.05, 1.5, inW), uWin.z);
+  float inS = 1.0 - smoothstep(uStr.x, uStr.x + 0.02, aStrength);
+  f *= mix(1.0, mix(0.05, 2.2, inS), uStr.y);
+  float sel = 1.0 - step(0.5, abs(aHexId - uSel.x));
+  f *= mix(1.0, mix(0.3, 2.5, sel), uSel.y);
+  vCol = texture(uPal, vec2(aPhase, 0.5)).rgb * (0.2 + aStrength) * gain * f * vis * uAlpha;
+}`;
+const LOOPS_FS = `#version 300 es
+precision highp float;
+in vec3 vCol; out vec4 o;
+void main() { o = vec4(vCol, 1.0); }`;
+const QUAD_VS = `#version 300 es
+out vec2 vUV;
+void main() { vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2); vUV = p; gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0); }`;
+// glow.render, step 1: tone-map by the brightest channel, so hue holds as overlaps pile up
+const MAP_FS = `#version 300 es
+precision highp float;
+uniform sampler2D uTex; uniform float uExposure;
+in vec2 vUV; out vec4 o;
+void main() {
+  vec3 b = texture(uTex, vUV).rgb;
+  float l = max(max(b.r, b.g), b.b);
+  o = vec4(b * ((1.0 - exp(-uExposure * l)) / max(l, 1e-12)), 1.0);
+}`;
+// one direction of a separable Gaussian (bloom)
+const BLUR_FS = `#version 300 es
+precision highp float;
+uniform sampler2D uTex; uniform vec2 uStep; uniform float uSigma;
+in vec2 vUV; out vec4 o;
+void main() {
+  vec3 acc = texture(uTex, vUV).rgb; float wsum = 1.0;
+  int taps = int(ceil(uSigma * 3.0));
+  for (int i = 1; i <= 64; i++) {
+    if (i > taps) break;
+    float w = exp(-0.5 * float(i * i) / (uSigma * uSigma));
+    acc += w * (texture(uTex, vUV + uStep * float(i)).rgb + texture(uTex, vUV - uStep * float(i)).rgb);
+    wsum += 2.0 * w;
+  }
+  o = vec4(acc / wsum, 1.0);
+}`;
+// the rest of glow.render: add bloom, saturate around Rec. 709 luma, gamma, quantize, floor to black
+const FINAL_FS = `#version 300 es
+precision highp float;
+uniform sampler2D uM, uB0, uB1, uB2, uB3; uniform vec4 uBloom;
+uniform float uSat, uGamma, uFloor;
+in vec2 vUV; out vec4 o;
+void main() {
+  vec3 c = texture(uM, vUV).rgb + uBloom.x * texture(uB0, vUV).rgb + uBloom.y * texture(uB1, vUV).rgb
+         + uBloom.z * texture(uB2, vUV).rgb + uBloom.w * texture(uB3, vUV).rgb;
+  float g = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  c = max(g + uSat * (c - g), 0.0);
+  c = floor(pow(clamp(c, 0.0, 1.0), vec3(uGamma)) * 255.0);
+  if (max(max(c.r, c.g), c.b) < uFloor) c = vec3(0.0);
+  o = vec4(c / 255.0, 1.0);
+}`;
+
+function initGL() {
+  const hasFloat = !!gl.getExtension("EXT_color_buffer_float");
+  const loops = program(LOOPS_VS, LOOPS_FS);
+  const post = hasFloat && { map: program(QUAD_VS, MAP_FS), blur: program(QUAD_VS, BLUR_FS),
+                             final: program(QUAD_VS, FINAL_FS) };
+
+  // loop radii: N texels per gage, packed perRow gages per texture row
+  const perRow = 16, rows = Math.ceil(n / perRow);
+  const rtex = new Uint8Array(perRow * N * rows); rtex.set(R8);
+  const texR = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texR);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, perRow * N, rows, 0, gl.RED, gl.UNSIGNED_BYTE, rtex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  const texPal = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texPal);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB8, 256, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, PAL);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+
+  // per-instance attributes
+  const hexC = new Float32Array(n * 2), hexGain = new Float32Array(n), hexIdF = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const h = HEXID[i], c = D.hex.count[h];
+    hexC[2*i] = D.hex.x[h]; hexC[2*i+1] = D.hex.y[h]; hexIdF[i] = h;
+    hexGain[i] = c < 2 ? 0 : Math.min(1, c / 5) / Math.sqrt(c);   // as ideas.regime_hexmap
+  }
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  const attr = (name, data, size, type, norm, div) => {
+    const loc = gl.getAttribLocation(loops.p, name); if (loc < 0) return;
+    const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, type, norm, 0, 0); gl.vertexAttribDivisor(loc, div);
+  };
+  attr("aVert", Float32Array.from({ length: N + 1 }, (_, i) => i), 1, gl.FLOAT, false, 0);
+  attr("aPhase", PH8, 1, gl.UNSIGNED_BYTE, true, 1);
+  attr("aStrength", ST8, 1, gl.UNSIGNED_BYTE, true, 1);
+  attr("aLoc", LOC, 2, gl.FLOAT, false, 1);
+  attr("aHexC", hexC, 2, gl.FLOAT, false, 1);
+  attr("aHexGain", hexGain, 1, gl.FLOAT, false, 1);
+  attr("aHexId", hexIdF, 1, gl.FLOAT, false, 1);
+  gl.bindVertexArray(null);
+  return { hasFloat, loops, post, perRow, texR, texPal, vao, w: 0, h: 0, bloomKey: "", blur: [] };
+}
+
+let G = null;
+if (gl) G = initGL(); else {
+  const m = document.createElement("div"); m.id = "nogl";
+  m.textContent = "This view needs WebGL 2, which this browser doesn't provide.";
+  graphic.appendChild(m);
+}
+
+// a float render target; mip levels let the bloom passes downsample by area instead of skipping pixels
+function target(w, h, mips = false) {
+  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texStorage2D(gl.TEXTURE_2D, mips ? Math.floor(Math.log2(Math.max(w, h))) + 1 : 1, gl.RGBA16F, w, h);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mips ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  return { tex, fb, w, h };
+}
+const freeTarget = t => { if (t) { gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fb); } };
+
+function sizeTargets(w, h) {
+  if (!G.hasFloat) return;
+  if (G.w !== w || G.h !== h) {
+    G.w = w; G.h = h;
+    if (G.msFB) { gl.deleteFramebuffer(G.msFB); gl.deleteRenderbuffer(G.rb); }
+    freeTarget(G.raw); freeTarget(G.mapped);
+    const samples = Math.min(4, gl.getParameter(gl.MAX_SAMPLES));
+    G.rb = gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER, G.rb);
+    gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, gl.RGBA16F, w, h);
+    G.msFB = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, G.msFB);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, G.rb);
+    G.raw = target(w, h); G.mapped = target(w, h, true);
+    G.bloomKey = "";
+  }
+  // one pair of half-blur targets per bloom term, small enough that each blur needs at most ~24 taps
+  const key = `${w}x${h}|${RENDER.bloom}`;
+  if (G.bloomKey === key) return;
+  G.bloomKey = key;
+  for (const b of G.blur) { freeTarget(b.a); freeTarget(b.b); }
+  G.blur = parseBloom(RENDER.bloom).map(([sigma, k]) => {
+    const sd = sigma * w / 3840, f = Math.min(1, Math.max(1 / 32, 8 / sd));
+    const bw = Math.max(1, Math.round(w * f)), bh = Math.max(1, Math.round(h * f));
+    return { k, sigma: sd * f, a: target(bw, bh), b: target(bw, bh) };
+  });
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+function pass(prog, dest, tex, uniforms) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, dest ? dest.fb : null);
+  gl.viewport(0, 0, dest ? dest.w : G.w, dest ? dest.h : G.h);
+  gl.useProgram(prog.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+  uniforms(prog.u);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+function drawLoops(st) {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const w = Math.round(L.W * dpr), h = Math.round(L.H * dpr);
+  if (glCanvas.width !== w || glCanvas.height !== h) { glCanvas.width = w; glCanvas.height = h; }
+  sizeTargets(w, h);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, G.hasFloat ? G.msFB : null);
+  gl.viewport(0, 0, w, h);
+  gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  if (st.crowd > 0.002) {
+    const { p, u } = G.loops;
+    gl.useProgram(p);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, G.texR); gl.uniform1i(u.uR, 0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, G.texPal); gl.uniform1i(u.uPal, 1);
+    gl.uniform1i(u.uN, N); gl.uniform1i(u.uPerRow, G.perRow); gl.uniform1f(u.uCount, n); gl.uniform1f(u.uRMax, D.rMax);
+    gl.uniform2f(u.uRes, L.W, L.H);
+    gl.uniform2f(u.uCenter, L.cx, L.cy); gl.uniform1f(u.uScale, L.crowdScale * st.crowdZoom);
+    gl.uniform3f(u.uMap, L.mx, L.my, L.mScale);
+    gl.uniform1f(u.uLocScale, L.mScale * 0.0075);
+    gl.uniform1f(u.uHexScale, 0.55 * D.hex.size * L.mScale / 1.45);
+    gl.uniform1f(u.uLoc, st.loc); gl.uniform1f(u.uHex, st.hex);
+    gl.uniform1f(u.uReveal, st.reveal); gl.uniform1f(u.uAlpha, st.crowd);
+    // brightness per loop: scaled for crowd size and screen area so the look holds across devices
+    const area = Math.sqrt((L.W * L.H) / (1440 * 900));
+    gl.uniform3f(u.uGains, 0.03 * Math.sqrt(7400 / n) * area, 0.5, 0.42);
+    gl.uniform3f(u.uWin, st.win[0], st.win[1], st.win[2]);
+    gl.uniform2f(u.uStr, STEADY, st.steady);
+    gl.uniform2f(u.uSel, st.sel, st.selAmt);
+    gl.bindVertexArray(G.vao);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, N + 1, n);
+    gl.bindVertexArray(null);
+    gl.disable(gl.BLEND);
+  }
+  if (!G.hasFloat) return;
+  const P = G.post;
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, G.msFB); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, G.raw.fb);
+  gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  pass(P.map, G.mapped, G.raw.tex, u => { gl.uniform1i(u.uTex, 0); gl.uniform1f(u.uExposure, RENDER.exposure); });
+  if (G.blur.length) { gl.bindTexture(gl.TEXTURE_2D, G.mapped.tex); gl.generateMipmap(gl.TEXTURE_2D); }
+  for (const b of G.blur) {
+    pass(P.blur, b.a, G.mapped.tex, u => { gl.uniform1i(u.uTex, 0); gl.uniform2f(u.uStep, 1 / b.a.w, 0); gl.uniform1f(u.uSigma, b.sigma); });
+    pass(P.blur, b.b, b.a.tex, u => { gl.uniform1i(u.uTex, 0); gl.uniform2f(u.uStep, 0, 1 / b.b.h); gl.uniform1f(u.uSigma, b.sigma); });
+  }
+  pass(P.final, null, G.mapped.tex, u => {
+    gl.uniform1i(u.uM, 0);
+    const k = [0, 0, 0, 0];
+    ["uB0", "uB1", "uB2", "uB3"].forEach((name, i) => {
+      gl.activeTexture(gl.TEXTURE1 + i);
+      gl.bindTexture(gl.TEXTURE_2D, G.blur[i] ? G.blur[i].b.tex : G.raw.tex);
+      gl.uniform1i(u[name], 1 + i);
+      if (G.blur[i]) k[i] = G.blur[i].k;
+    });
+    gl.uniform4f(u.uBloom, ...k);
+    gl.uniform1f(u.uSat, RENDER.saturation); gl.uniform1f(u.uGamma, RENDER.gamma); gl.uniform1f(u.uFloor, RENDER.floor);
+  });
+  gl.activeTexture(gl.TEXTURE0);
+}
+
+// ---------- SVG overlay ----------
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent = svg) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e); return e;
+};
+let O = {};
+function buildOverlay() {
+  svg.replaceChildren();
+  svg.setAttribute("viewBox", `0 0 ${L.W} ${L.H}`);
+  O = {};
+  // basin outlines
+  O.map = el("g", { fill: "none", stroke: "#9a9aa3", "stroke-width": 0.8, "stroke-linejoin": "round", opacity: 0 });
+  for (const ring of D.outlines) {
+    let d = "";
+    for (let i = 0; i < ring.length; i += 2)
+      d += (i ? "L" : "M") + (L.mx + ring[i] * L.mScale).toFixed(1) + "," + (L.my + ring[i+1] * L.mScale).toFixed(1);
+    el("path", { d: d + "Z", "vector-effect": "non-scaling-stroke" }, O.map);
+  }
+  O.hexOutline = el("path", { fill: "none", stroke: "#e8e4da", "stroke-width": 1, opacity: 0 });
+
+  // crowd month ticks
+  O.ticks = el("g", { opacity: 0 });
+  const tr = (maxR + 0.06) * L.crowdScale;
+  for (let m = 0; m < 12; m++) {
+    const a = TAU * MONTH_START[m] / 365, s = Math.sin(a), c = -Math.cos(a);
+    el("line", { x1: L.cx + s * tr, y1: L.cy + c * tr, x2: L.cx + s * (tr + 8), y2: L.cy + c * (tr + 8),
+      stroke: rgbStr(palRGB(MONTH_START[m] / 365)), "stroke-width": 1.5 }, O.ticks);
+    const t = el("text", { x: L.cx + s * (tr + 22), y: L.cy + c * (tr + 22) + 4, "text-anchor": "middle" }, O.ticks);
+    t.textContent = MONTHS[m];
+  }
+
+  // linear axes for the first example
+  O.axes = el("g", { opacity: 0 });
+  O.ex = [];
+  for (let k = 0; k < D.examples.length; k++) {
+    const g = el("g", { opacity: 0 });
+    const mean = el("path", { fill: "none", stroke: "#9a978f", "stroke-width": 1, "stroke-dasharray": "3 4" }, g);
+    const line = el("path", { fill: "none", stroke: "#e8e4da", "stroke-width": 1.8, "stroke-linejoin": "round" }, g);
+    const arrow = el("g", { opacity: 0 }, g);
+    const shaft = el("line", { "stroke-width": 2, "stroke-linecap": "round" }, arrow);
+    const head = el("path", {}, arrow);
+    const label = el("text", { class: "ex-label", "text-anchor": "middle" }, g);
+    const sub = el("text", { class: "ex-sub", "text-anchor": "middle" }, g);
+    label.textContent = D.examples[k].label;
+    sub.textContent = D.examples[k].regime;
+    O.ex.push({ g, mean, line, arrow, shaft, head, label, sub });
+  }
+  O.polarMonths = el("g", { opacity: 0 });
+  for (let m = 0; m < 12; m++) el("text", { "text-anchor": "middle" }, O.polarMonths).textContent = MONTHS[m];
+
+  // ring legend with a histogram of flow-weighted dates
+  const lr = L.wide ? 64 : 46;
+  const lx = L.wide ? L.plot.x1 - lr - 30 : L.plot.x1 - lr - 22;
+  const ly = L.wide ? L.plot.y1 - lr - 34 : L.plot.y1 - lr - 10;
+  O.legend = el("g", { opacity: 0, transform: `translate(${lx},${ly})` });
+  O.legendGeom = { x: lx, y: ly, r: lr };
+  const segs = 96;
+  for (let i = 0; i < segs; i++) {
+    const a0 = TAU * i / segs, a1 = TAU * (i + 1.05) / segs, r0 = lr * 0.78, r1 = lr;
+    const P = (r, a) => `${(r * Math.sin(a)).toFixed(2)},${(-r * Math.cos(a)).toFixed(2)}`;
+    el("path", { d: `M${P(r0, a0)}L${P(r1, a0)}A${r1},${r1} 0 0 1 ${P(r1, a1)}L${P(r0, a1)}A${r0},${r0} 0 0 0 ${P(r0, a0)}Z`,
+      fill: rgbStr(palRGB((i + 0.5) / segs)) }, O.legend);
+  }
+  const bins = new Array(73).fill(0);
+  for (let i = 0; i < n; i++) bins[Math.min(72, Math.floor(phase(i) * 73))]++;
+  const bmax = Math.max(...bins);
+  let hd = "";
+  for (let i = 0; i < 73; i++) {
+    const a = TAU * (i + 0.5) / 73, r0 = lr * 0.72, r1 = r0 - lr * 0.6 * Math.sqrt(bins[i] / bmax);
+    hd += `M${(r0 * Math.sin(a)).toFixed(1)},${(-r0 * Math.cos(a)).toFixed(1)}L${(r1 * Math.sin(a)).toFixed(1)},${(-r1 * Math.cos(a)).toFixed(1)}`;
+  }
+  el("path", { d: hd, stroke: "#9a978f", "stroke-width": Math.max(1.5, TAU * lr * 0.5 / 73 - 1), opacity: 0.8 }, O.legend);
+  for (const m of [0, 3, 6, 9]) {
+    const a = TAU * MONTH_START[m] / 365, r = lr + 13;
+    el("text", { x: r * Math.sin(a), y: -r * Math.cos(a) + 4, "text-anchor": "middle" }, O.legend).textContent = MONTHS[m];
+  }
+  O.legendWin = el("path", { fill: "none", stroke: "#e8e4da", "stroke-width": 2 }, O.legend);
+  O.legendLabel = el("text", { y: lr + 30, "text-anchor": "middle", class: "mono" }, O.legend);
+}
+
+// bend a 365-day series from a straight line (m=0) into a polar loop (m=1): the curve keeps its
+// arc length and curls clockwise from Jan 1, so the mean line closes into the unit circle
+function bendPath(R, m, S, Lw, s) {
+  const len = R.length, Lm = Lw + (TAU * s - Lw) * m, phi = TAU * m;
+  let d = "";
+  for (let i = 0; i <= len; i++) {
+    const u = Lm * i / len, off = (R[i % len] - 1) * s;
+    let x, y;
+    if (phi < 1e-4) { x = S[0] + u; y = S[1] - off; }
+    else {
+      const rho = Lm / phi, a = u / rho;
+      x = S[0] + (rho + off) * Math.sin(a);
+      y = S[1] + rho - (rho + off) * Math.cos(a);
+    }
+    d += (i ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1);
+  }
+  return d;
+}
+
+function drawAxes(st, S, Lw, s) {
+  const g = O.axes;
+  g.replaceChildren();
+  g.setAttribute("opacity", st.axes);
+  if (st.axes < 0.01) return;
+  const ex = D.examples[0];
+  for (const r of [0.25, 0.5, 1, 2, 4]) {
+    const y = S[1] - 0.22 * Math.log2(r) * s;
+    el("line", { x1: S[0], x2: S[0] + Lw, y1: y, y2: y, stroke: "#e8e4da", "stroke-opacity": r === 1 ? 0 : 0.08 }, g);
+    const t = el("text", { x: S[0] - 8, y: y + 4, "text-anchor": "end", class: "mono" }, g);
+    t.textContent = r === 1 ? "mean" : (r < 1 ? `${r === 0.5 ? "½" : "¼"}×` : `${r}×`);
+    if (r !== 1) continue;
+    const c = el("text", { x: S[0] + Lw + 6, y: y + 4, class: "mono" }, g);
+    c.textContent = `${fmt(Math.round(ex.mean_cfs / 10) * 10)} cfs`;
+  }
+  const yb = S[1] + 0.22 * 2.6 * s;
+  for (let m = 0; m < 12; m++) {
+    const x = S[0] + Lw * MONTH_START[m] / 365;
+    el("line", { x1: x, x2: x, y1: yb - 4, y2: yb + 2, stroke: "#5d5b56" }, g);
+    el("text", { x: x + Lw / 24, y: yb + 16, "text-anchor": "middle" }, g).textContent = MONTHS[m][0] + (L.wide ? MONTHS[m].slice(1) : "");
+  }
+}
+
+const NEUTRAL = [232, 228, 218];
+function drawExamples(st) {
+  // linear stage geometry for example 0
+  const padL = L.wide ? 48 : 34, padR = L.wide ? 70 : 52;
+  const Lw = L.pw - padL - padR;
+  const sLin = Math.min(L.ph * 0.42 / (0.22 * 2.2), Lw / 5);
+  const S0 = [L.plot.x0 + padL, L.cy];
+  drawAxes(st, S0, Lw, sLin);
+  for (let k = 0; k < D.examples.length; k++) {
+    const ex = D.examples[k], o = O.ex[k];
+    const vis = k === 0 ? st.ex0 : st.exAll;
+    o.g.setAttribute("opacity", vis);
+    if (vis < 0.005) continue;
+    const cell = L.cell(k);
+    // polar center and scale: solo (example 0 only), grid cell, then converging on the crowd
+    let cx = L.cx, cy = L.cy, s = L.solo;
+    if (k > 0 || st.grid > 0) {
+      cx = L.cx + (cell.x - L.cx) * st.grid; cy = L.cy + (cell.y - L.cy) * st.grid;
+      s = L.solo + (L.gridScale - L.solo) * st.grid;
+    }
+    cx += (L.cx - cx) * st.gather; cy += (L.cy - cy) * st.gather; s += (L.crowdScale - s) * st.gather;
+    let S, Lw2, sc;
+    if (k === 0) {
+      const m = st.morph;
+      S = [S0[0] + (cx - S0[0]) * m, S0[1] + (cy - s - S0[1]) * m];
+      Lw2 = Lw; sc = sLin + (s - sLin) * m;
+    } else { S = [cx, cy - s]; Lw2 = TAU * s; sc = s; }
+    const m = k === 0 ? st.morph : 1;
+    o.line.setAttribute("d", bendPath(ex.R, m, S, Lw2, sc));
+    o.mean.setAttribute("d", bendPath([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], m, S, Lw2, sc));
+    const col = palRGB(ex.phase), c = NEUTRAL.map((v, i) => v + (col[i] - v) * st.color);
+    o.line.setAttribute("stroke", rgbStr(c));
+    o.line.setAttribute("stroke-width", 1.8 - 0.8 * st.gather);
+    o.mean.setAttribute("opacity", 1 - st.gather);
+    // flow-weighted mean date arrow
+    o.arrow.setAttribute("opacity", st.arrow * (1 - st.gather));
+    const a = TAU * ex.phase, len = Math.max(0.0001, ex.strength * s);
+    const ax = cx + Math.sin(a) * len, ay = cy - Math.cos(a) * len;
+    o.shaft.setAttribute("x1", cx); o.shaft.setAttribute("y1", cy);
+    o.shaft.setAttribute("x2", ax); o.shaft.setAttribute("y2", ay);
+    o.shaft.setAttribute("stroke", rgbStr(col));
+    const hs = 7, ux = Math.sin(a), uy = -Math.cos(a);
+    o.head.setAttribute("d", ex.strength < 0.05 ? `M${cx - 3},${cy}a3,3 0 1 0 6,0a3,3 0 1 0 -6,0` :
+      `M${ax + ux * 2},${ay + uy * 2}L${ax - ux * hs - uy * hs * 0.6},${ay - uy * hs + ux * hs * 0.6}L${ax - ux * hs + uy * hs * 0.6},${ay - uy * hs - ux * hs * 0.6}Z`);
+    o.head.setAttribute("fill", rgbStr(col));
+    // labels: under the loop in the grid, above it when solo
+    const showLabel = k === 0 ? Math.max(st.grid, st.soloLabel) : 1;
+    const ly = st.grid > 0.5 || k > 0 ? cy + s * 1.55 + 14 : L.plot.y0 + 18;
+    o.label.setAttribute("x", st.grid > 0.5 || k > 0 ? cx : L.cx); o.label.setAttribute("y", ly);
+    o.sub.setAttribute("x", st.grid > 0.5 || k > 0 ? cx : L.cx); o.sub.setAttribute("y", ly + 16);
+    o.sub.textContent = st.arrow > 0.5 ? `${ex.regime} · ${doyLabel(ex.phase)}` : ex.regime;
+    o.label.setAttribute("opacity", showLabel * (1 - st.gather));
+    o.sub.setAttribute("opacity", showLabel * (1 - st.gather));
+  }
+  // month names around the solo polar loop
+  O.polarMonths.setAttribute("opacity", st.polarMonths);
+  if (st.polarMonths > 0.01) {
+    const r = L.solo * 1.62;
+    [...O.polarMonths.children].forEach((t, m) => {
+      const a = TAU * MONTH_START[m] / 365;
+      t.setAttribute("x", L.cx + r * Math.sin(a)); t.setAttribute("y", L.cy - r * Math.cos(a) + 4);
+    });
+  }
+}
+
+// ---------- scene ----------
+// step indices: 0 intro, 1 line, 2 roll, 3 six rivers, 4 color, 5 all, 6 snow, 7 winter, 8 steady,
+// 9 map, 10 hexes, 11 explore
+function state(s) {
+  return {
+    crowd: kf(s, [[0.5, 1], [0.9, 0], [4.7, 0], [5.15, 1]]),
+    reveal: kf(s, [[0.5, 1], [0.9, 0], [5.0, 0], [5.75, 1]]),
+    crowdZoom: 1,
+    axes: kf(s, [[0.6, 0], [1.0, 1], [2.05, 1], [2.3, 0]]),
+    ex0: kf(s, [[0.6, 0], [1.0, 1], [4.6, 1], [5.2, 0]]),
+    soloLabel: kf(s, [[0.6, 0], [1.0, 1]]),
+    morph: kf(s, [[2.05, 0], [2.7, 1]]),
+    polarMonths: kf(s, [[2.5, 0], [2.8, 1], [3.05, 1], [3.3, 0]]),
+    grid: kf(s, [[3.0, 0], [3.4, 1]]),
+    exAll: kf(s, [[3.15, 0], [3.5, 1], [4.6, 1], [5.2, 0]]),
+    color: kf(s, [[3.9, 0], [4.25, 1]]),
+    arrow: kf(s, [[4.0, 0], [4.35, 1]]),
+    gather: kf(s, [[4.75, 0], [5.15, 1]]),
+    ticks: kf(s, [[0.5, 1], [0.9, 0], [5.0, 0], [5.4, 1], [8.9, 1], [9.3, 0]]),
+    legend: kf(s, [[3.9, 0], [4.3, 1]]),
+    win: winState(s),
+    steady: kf(s, [[7.8, 0], [8.2, 1], [8.85, 1], [9.15, 0]]),
+    loc: kf(s, [[8.95, 0], [9.5, 1]]),
+    hex: kf(s, [[9.95, 0], [10.5, 1]]),
+    map: kf(s, [[8.95, 0], [9.5, 1]]),
+    sel: hover.hex, selAmt: s > 10.6 && hover.hex >= 0 ? 1 : 0,
+  };
+}
+function winState(s) {
+  if (pick.active && s > 10.6) return [pick.center, 0.04, 1];
+  const a6 = kf(s, [[5.8, 0], [6.2, 1], [6.8, 1], [7.0, 0]]);
+  const a7 = kf(s, [[6.95, 0], [7.2, 1], [7.8, 1], [8.0, 0]]);
+  const snowC = (WIN.snow[0] + WIN.snow[1]) / 2, snowW = (WIN.snow[1] - WIN.snow[0]) / 2;
+  const winC = ((WIN.winter[0] + WIN.winter[1] + 1) / 2) % 1, winW = (WIN.winter[1] + 1 - WIN.winter[0]) / 2;
+  if (a7 > 0) return [winC, winW, a7];
+  return [snowC, snowW, a6];
+}
+
+// ---------- interaction (explore step) ----------
+const hover = { hex: -1 }, pick = { active: false, center: 0 };
+let S = 0;
+function hexPx(h) { return [L.mx + D.hex.x[h] * L.mScale, L.my + D.hex.y[h] * L.mScale]; }
+function onPointer(e) {
+  if (S < 10.6) { if (hover.hex >= 0 || pick.active) { hover.hex = -1; pick.active = false; tip.hidden = true; schedule(); } return; }
+  const r = graphic.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  // color ring
+  const lg = O.legendGeom, dx = x - lg.x, dy = y - lg.y, dr = Math.hypot(dx, dy);
+  if (dr > lg.r * 0.6 && dr < lg.r + 18) {
+    pick.active = true; pick.center = ((Math.atan2(dx, -dy) / TAU) + 1) % 1;
+    hover.hex = -1; tip.hidden = true; schedule(); return;
+  }
+  pick.active = false;
+  // nearest hexagon
+  let best = -1, bd = Infinity;
+  for (let h = 0; h < D.hex.count.length; h++) {
+    if (D.hex.count[h] < 2) continue;
+    const [hx, hy] = hexPx(h), d = (hx - x) ** 2 + (hy - y) ** 2;
+    if (d < bd) { bd = d; best = h; }
+  }
+  const rad = D.hex.size * L.mScale / Math.sqrt(3);
+  if (bd > rad * rad) best = -1;
+  if (best !== hover.hex) { hover.hex = best; showTip(best, x, y); schedule(); }
+  else if (best >= 0) placeTip(x, y);
+}
+function showTip(h, x, y) {
+  if (h < 0) { tip.hidden = true; return; }
+  const idx = []; for (let i = 0; i < n; i++) if (HEXID[i] === h) idx.push(i);
+  let zx = 0, zy = 0; for (const i of idx) { zx += Math.sin(TAU * phase(i)); zy += Math.cos(TAU * phase(i)); }
+  const p = ((Math.atan2(zx, zy) / TAU) + 1) % 1;
+  const names = idx.slice().sort((a, b) => strength(b) - strength(a)).slice(0, 4).map(i => D.names[i]);
+  tip.innerHTML = `<b>${idx.length} gages</b> · typical water date <b style="color:${rgbStr(palRGB(p))}">${doyLabel(p)}</b><ul>${names.map(s => `<li>${s.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</li>`).join("")}</ul>`;
+  tip.hidden = false; placeTip(x, y);
+}
+function placeTip(x, y) {
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(L.W - w - 12, Math.max(12, x + 16)) + "px";
+  tip.style.top = Math.min(L.H - h - 12, Math.max(12, y + 16)) + "px";
+}
+graphic.addEventListener("pointermove", onPointer);
+graphic.addEventListener("pointerdown", onPointer);
+graphic.addEventListener("pointerleave", () => { hover.hex = -1; pick.active = false; tip.hidden = true; schedule(); });
+
+// ---------- year dial: scroll progress as a 73-segment ring that paints in clockwise from Jan 1 ----------
+const DIAL_SEG = 73;
+const dialSegs = (() => {
+  const g = document.getElementById("dial"), ns = "http://www.w3.org/2000/svg", r = 18, gap = 0.012;
+  const P = a => `${(r * Math.sin(a)).toFixed(2)},${(-r * Math.cos(a)).toFixed(2)}`;
+  const segs = [];
+  for (let k = 0; k < DIAL_SEG; k++) {
+    const a0 = TAU * (k / DIAL_SEG + gap), a1 = TAU * ((k + 1) / DIAL_SEG - gap);
+    const path = document.createElementNS(ns, "path");
+    path.setAttribute("d", `M${P(a0)}A${r},${r} 0 0 1 ${P(a1)}`);
+    path.setAttribute("fill", "none"); path.setAttribute("stroke-width", 5);
+    g.appendChild(path); segs.push([path, rgbStr(palRGB((k + 0.5) / DIAL_SEG))]);
+  }
+  for (let m = 0; m < 12; m++) {
+    const a = TAU * MONTH_START[m] / 365, t = document.createElementNS(ns, "line");
+    t.setAttribute("x1", 22.5 * Math.sin(a)); t.setAttribute("y1", -22.5 * Math.cos(a));
+    t.setAttribute("x2", 25 * Math.sin(a)); t.setAttribute("y2", -25 * Math.cos(a));
+    t.setAttribute("stroke", m % 3 ? "#2a2926" : "#5d5b56"); g.appendChild(t);
+  }
+  return segs;
+})();
+let dialShown = -1;
+function drawDial(s) {
+  const k = Math.round(DIAL_SEG * Math.min(1, s / (stepEls.length - 1)));
+  if (k === dialShown) return;
+  dialShown = k;
+  dialSegs.forEach(([path, col], i) => path.setAttribute("stroke", i < k ? col : "#2a2926"));
+}
+
+// ---------- frame ----------
+let queued = false;
+function schedule() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+function frame() {
+  queued = false;
+  S = sceneTime();
+  const st = state(S);
+  drawDial(S);
+  if (G) drawLoops(st);
+  O.map.setAttribute("opacity", 0.35 * st.map);
+  O.ticks.setAttribute("opacity", st.ticks * (1 - st.loc) * 0.9);
+  O.legend.setAttribute("opacity", st.legend);
+  drawExamples(st);
+  // legend: show the active date window
+  const w = st.win;
+  if (w[2] > 0.01) {
+    const r = O.legendGeom.r + 5, a0 = TAU * (w[0] - w[1]), a1 = TAU * (w[0] + w[1]);
+    const P = a => `${(r * Math.sin(a)).toFixed(1)},${(-r * Math.cos(a)).toFixed(1)}`;
+    O.legendWin.setAttribute("d", `M${P(a0)}A${r},${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${P(a1)}`);
+    O.legendWin.setAttribute("opacity", w[2]);
+    O.legendLabel.textContent = `${doyLabel(w[0] - w[1])} – ${doyLabel(w[0] + w[1])}`;
+    O.legendLabel.setAttribute("opacity", w[2]);
+  } else { O.legendWin.setAttribute("opacity", 0); O.legendLabel.setAttribute("opacity", 0); }
+  if (st.selAmt > 0 && hover.hex >= 0) {
+    const [hx, hy] = hexPx(hover.hex), r = D.hex.size * L.mScale / Math.sqrt(3);
+    let d = ""; for (let i = 0; i < 6; i++) { const a = Math.PI / 3 * i; d += (i ? "L" : "M") + (hx + r * Math.sin(a)).toFixed(1) + "," + (hy - r * Math.cos(a)).toFixed(1); }
+    O.hexOutline.setAttribute("d", d + "Z"); O.hexOutline.setAttribute("opacity", 0.6);
+  } else O.hexOutline.setAttribute("opacity", 0);
+}
+function resize() { layout(); buildOverlay(); schedule(); }
+
+// ---------- ?tune: live render controls; the URL updates so a look can be bookmarked or shared ----------
+if (qs.has("tune") || location.hash === "#tune") {  // #tune also works where query strings are dropped
+  const panel = document.createElement("div"); panel.id = "tune";
+  const rows = [["exposure", 0.2, 4, 0.05], ["gamma", 0.3, 1.5, 0.01], ["saturation", 0, 2.5, 0.05], ["floor", 0, 32, 1]];
+  panel.innerHTML = rows.map(([k, lo, hi, step]) => `<label>${k} <output></output>` +
+    `<input type="range" name="${k}" min="${lo}" max="${hi}" step="${step}" value="${RENDER[k]}"></label>`).join("") +
+    `<label>bloom <input type="text" name="bloom" value="${RENDER.bloom}" spellcheck="false"></label>`;
+  document.body.appendChild(panel);
+  const sync = () => {
+    panel.querySelectorAll("input").forEach(inp => {
+      RENDER[inp.name] = inp.type === "range" ? +inp.value : inp.value.trim() || "none";
+      const out = inp.parentNode.querySelector("output"); if (out) out.textContent = inp.value;
+      qs.set(inp.name, RENDER[inp.name]);
+    });
+    try { history.replaceState(null, "", "?" + qs.toString().replace(/%3A/g, ":").replace(/%2C/g, ",") + location.hash); } catch (e) {}
+    schedule();
+  };
+  panel.addEventListener("input", sync); sync();
+}
+addEventListener("resize", resize);
+addEventListener("scroll", schedule, { passive: true });
+resize();
+})();
+</script>
