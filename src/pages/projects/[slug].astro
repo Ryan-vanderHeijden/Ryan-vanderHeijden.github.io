@@ -1,0 +1,120 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import DualGraph from '../../components/diagrams/DualGraph.astro';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, prev: projects[i - 1], next: projects[i + 1] },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const full = data.image && (await getImage({ src: data.image, format: 'webp', quality: 90 }));
+---
+
+<Layout title={data.title} description={data.summary}>
+  <main class="project">
+    <header class="head">
+      <p class="kicker">Research software &middot; private repository</p>
+      <h1>{data.title}</h1>
+      <p class="subtitle">{data.subtitle}</p>
+      <p class="summary">{data.summary}</p>
+    </header>
+
+    <dl class="facts">
+      {data.facts.map((f) => (
+        <div>
+          <dt>{f.value}</dt>
+          <dd>{f.label}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <figure class="figure">
+      {data.image && (
+        <a href={full!.src}>
+          <Picture
+            src={data.image}
+            alt={data.alt}
+            widths={[960, 1600, 2400]}
+            sizes="(min-width: 1200px) 1100px, 100vw"
+            formats={['avif', 'webp']}
+            fallbackFormat="webp"
+            loading="eager"
+          />
+        </a>
+      )}
+      {data.diagram === 'dual-graph' && <DualGraph />}
+      <figcaption>{data.caption}</figcaption>
+    </figure>
+
+    <article class="body">
+      <Content />
+      <p class="stack"><span>Built with</span> {data.stack}</p>
+      <p class="private">
+        The code is in a private repository. I'm happy to walk through it or share access on request:
+        <a href="mailto:rvanderh@uvm.edu">rvanderh@uvm.edu</a>.
+      </p>
+    </article>
+
+    <nav class="pager" aria-label="More projects">
+      {prev ? <a rel="prev" href={`/projects/${prev.id}/`}><span>Previous</span>{prev.data.title}</a> : <a href="/#projects"><span>Back</span>All projects</a>}
+      {next ? <a rel="next" href={`/projects/${next.id}/`}><span>Next</span>{next.data.title}</a> : <span />}
+    </nav>
+  </main>
+</Layout>
+
+<style>
+  .project { padding: clamp(1.5rem, 4vw, 3rem) var(--gutter) 0; }
+  .head { max-width: 46rem; }
+  .kicker { color: var(--faint); font-size: var(--t-small); }
+  h1 { margin-top: 0.5rem; font-size: var(--t-h1); font-weight: 300; letter-spacing: -0.015em; }
+  .subtitle { margin-top: 0.4rem; color: var(--ink); font-size: var(--t-title); }
+  .summary { margin-top: 1.25rem; color: var(--muted); max-width: var(--measure); }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.5rem clamp(1.5rem, 4vw, 3rem);
+    margin: clamp(2rem, 5vw, 3.5rem) 0 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    max-width: 68rem;
+  }
+  .facts dt { color: var(--ink); font-size: var(--t-h2); font-weight: 300; line-height: 1.1; }
+  .facts dd { margin: 0.4rem 0 0; color: var(--muted); font-size: var(--t-small); line-height: 1.5; }
+
+  .figure { margin: clamp(2.5rem, 6vw, 4.5rem) 0 0; max-width: 72rem; }
+  .figure :global(img) { width: 100%; height: auto; border-radius: 4px; }
+  figcaption { margin-top: 1rem; max-width: var(--measure); color: var(--muted); font-size: var(--t-small); line-height: 1.55; }
+
+  .body { max-width: var(--measure); margin-top: clamp(2.5rem, 6vw, 4rem); line-height: 1.7; }
+  .body :global(h2) { font-size: var(--t-title); margin: 2.5rem 0 0.75rem; }
+  .body :global(h2:first-child) { margin-top: 0; }
+  .body :global(ul) { margin: 0.9em 0 0; padding-left: 1.1rem; }
+  .body :global(li + li) { margin-top: 0.6rem; }
+  .body :global(strong) { color: var(--ink); font-weight: 500; }
+  .body :global(code) { font-size: 0.9em; color: var(--ink); }
+  .stack, .private { margin-top: 2.5rem; color: var(--muted); font-size: var(--t-small); }
+  .private { margin-top: 0.5rem; }
+  .stack span { font-style: italic; }
+
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin: clamp(3rem, 7vw, 6rem) calc(-1 * var(--gutter)) 0;
+    padding: 1.5rem var(--gutter) 0;
+    border-top: 1px solid var(--rule);
+  }
+  .pager a { color: var(--ink); text-decoration: none; }
+  .pager a:hover { text-decoration: underline; }
+  .pager a span { display: block; color: var(--faint); font-size: var(--t-small); }
+  .pager a[rel='next'] { text-align: right; }
+</style>

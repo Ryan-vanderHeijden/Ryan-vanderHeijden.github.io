@@ -1,0 +1,140 @@
+---
+// CRB-GNN at a glance: the dual graph on the left, the dual encoder on the right.
+// The graph is schematic (seven basins), not the real 196-gage network.
+const R = 9;
+const nodes = {
+  a: [60, 60], b: [210, 44], c: [130, 150], d: [270, 160],
+  g: [36, 236], e: [170, 260], f: [262, 360],
+} as const;
+type Id = keyof typeof nodes;
+const ungaged: Id[] = ['c'];
+// river edges run downstream (arrows point to the outlet, f); the model also sees them reversed
+const river: [Id, Id][] = [['a', 'c'], ['c', 'e'], ['b', 'd'], ['d', 'e'], ['g', 'e'], ['e', 'f']];
+const similar: [Id, Id][] = [['a', 'b'], ['g', 'a'], ['d', 'f']];
+
+// a segment between two nodes, pulled back from both circles
+function seg(p: Id, q: Id, gap: number) {
+  const [x1, y1] = nodes[p];
+  const [x2, y2] = nodes[q];
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  const ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+  return { x1: x1 + ux * gap, y1: y1 + uy * gap, x2: x2 - ux * gap, y2: y2 - uy * gap };
+}
+---
+
+<div class="dual">
+  <figure class="part graph">
+    <svg viewBox="0 0 300 400" role="img" aria-labelledby="dg-graph-title">
+      <title id="dg-graph-title">Seven basins joined by river edges and drought-similarity edges; one basin is ungaged.</title>
+      <defs>
+        <marker id="dg-river" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" class="river-head" />
+        </marker>
+      </defs>
+      {similar.map(([p, q]) => <line class="similar" {...seg(p, q, R + 4)} />)}
+      {river.map(([p, q]) => <line class="river" {...seg(p, q, R + 3)} marker-end="url(#dg-river)" />)}
+      {(Object.keys(nodes) as Id[]).map((id) => (
+        <circle class:list={['node', { ungaged: ungaged.includes(id) }]} cx={nodes[id][0]} cy={nodes[id][1]} r={R} />
+      ))}
+    </svg>
+    <figcaption class="key">
+      <span><i class="k-river"></i>river, both directions</span>
+      <span><i class="k-similar"></i>drought similarity (SPEI)</span>
+      <span><i class="k-gaged"></i>gaged <i class="k-ungaged"></i>ungaged</span>
+    </figcaption>
+  </figure>
+
+  <figure class="part pipe">
+    <svg viewBox="0 0 680 400" role="img" aria-labelledby="dg-pipe-title">
+      <title id="dg-pipe-title">Recent flow goes through a flow encoder; weather, forecasts and basin data go through a universal encoder; an imputation network fills in the flow encoding when there is no gage; both feed a temporal graph network that forecasts flow percentiles.</title>
+      <defs>
+        <marker id="dg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" class="head" />
+        </marker>
+      </defs>
+
+      <!-- inputs -->
+      <rect class="box input" x="1" y="20" width="190" height="60" />
+      <text x="96" y="46">Recent flow</text><text class="sub" x="96" y="67">percentiles</text>
+      <rect class="box input" x="1" y="150" width="190" height="60" />
+      <text x="96" y="176">Basin attributes</text><text class="sub" x="96" y="197">GAGES-II</text>
+      <rect class="box input" x="1" y="280" width="190" height="60" />
+      <text x="96" y="306">Weather, forecasts,</text><text class="sub" x="96" y="327">snow, soils, reservoirs</text>
+
+      <!-- encoders -->
+      <rect class="box" x="240" y="20" width="160" height="60" />
+      <text x="320" y="56">Flow encoder</text>
+      <rect class="box" x="240" y="150" width="160" height="60" />
+      <text x="320" y="176">Imputation</text><text x="320" y="197">network</text>
+      <rect class="box" x="240" y="280" width="160" height="60" />
+      <text x="320" y="306">Universal</text><text x="320" y="327">encoder</text>
+
+      <line class="flow" x1="191" y1="50" x2="236" y2="50" marker-end="url(#dg-arrow)" />
+      <line class="flow" x1="191" y1="180" x2="236" y2="180" marker-end="url(#dg-arrow)" />
+      <line class="flow" x1="191" y1="310" x2="236" y2="310" marker-end="url(#dg-arrow)" />
+      <line class="flow" x1="320" y1="280" x2="320" y2="214" marker-end="url(#dg-arrow)" />
+
+      <!-- into the graph network -->
+      <path class="flow" d="M400,50 H450 V130 H486" marker-end="url(#dg-arrow)" />
+      <path class="flow stand-in" d="M400,180 H450 V134" />
+      <text class="note" x="406" y="171">no gage</text>
+      <path class="flow" d="M400,310 H450 V240 H486" marker-end="url(#dg-arrow)" />
+
+      <rect class="box core" x="490" y="80" width="180" height="200" />
+      <text x="580" y="160">Temporal</text>
+      <text x="580" y="182">graph network</text>
+      <text class="sub" x="580" y="210">on the dual graph</text>
+
+      <line class="flow" x1="580" y1="280" x2="580" y2="326" marker-end="url(#dg-arrow)" />
+      <text x="580" y="352">q5 · q50 · q95</text>
+      <text class="sub" x="580" y="374">weekly flow percentile</text>
+    </svg>
+  </figure>
+</div>
+
+<style>
+  .dual {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+  .part { margin: 0; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+  .river { stroke: #3a9fd0; stroke-width: 2; }
+  .river-head { fill: #3a9fd0; }
+  .similar { stroke: #c47e32; stroke-width: 2; stroke-dasharray: 6 5; }
+  .node { fill: var(--ink); stroke: var(--bg); stroke-width: 3; }
+  .node.ungaged { fill: var(--bg); stroke: var(--ink); stroke-width: 2; }
+
+  .box { fill: none; stroke: var(--faint); stroke-width: 1.5; rx: 4; }
+  .box.core { stroke: var(--muted); }
+  .flow { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+  .stand-in { stroke-dasharray: 5 4; }
+  .head { fill: var(--muted); }
+  text { fill: var(--ink); font-family: var(--serif); font-size: 17px; text-anchor: middle; }
+  text.sub { fill: var(--muted); font-size: 15px; }
+  text.note { fill: var(--muted); font-size: 13px; font-style: italic; text-anchor: start; }
+
+  .key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.25rem;
+    margin-top: 1rem;
+    color: var(--muted);
+    font-size: var(--t-small);
+  }
+  .key span { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .key i { display: inline-block; flex: none; }
+  .k-river { width: 1.4rem; border-top: 2px solid #3a9fd0; }
+  .k-similar { width: 1.4rem; border-top: 2px dashed #c47e32; }
+  .k-gaged, .k-ungaged { width: 0.7rem; height: 0.7rem; border-radius: 50%; }
+  .k-gaged { background: var(--ink); }
+  .k-ungaged { border: 2px solid var(--ink); margin-left: 0.5rem; }
+
+  @media (max-width: 720px) {
+    .dual { grid-template-columns: 1fr; }
+    .graph svg { max-width: 18rem; margin: 0 auto; }
+  }
+</style>

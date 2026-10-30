@@ -39,6 +39,7 @@ const path = Astro.url.pathname;
         <a class="home" href="/">{NAME}</a>
         <nav aria-label="Site">
           <a href="/" aria-current={path === '/' ? 'page' : undefined}>Gallery</a>
+          <a href="/#projects">Projects</a>
           <a href="/about/" aria-current={path === '/about/' ? 'page' : undefined}>About</a>
         </nav>
       </header>

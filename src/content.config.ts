@@ -24,4 +24,24 @@ const gallery = defineCollection({
     }),
 });
 
-export const collections = { gallery };
+// Write-ups of research software whose repositories are private. The body is the write-up;
+// `facts` is the row of numbers at the top of the page.
+const projects = defineCollection({
+  loader: glob({ pattern: '*.md', base: './src/content/projects' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      subtitle: z.string(),
+      order: z.number(),
+      summary: z.string(),
+      stack: z.string(),
+      facts: z.array(z.object({ value: z.string(), label: z.string() })),
+      // either a picture or one of the drawn diagrams in src/components/diagrams
+      image: image().optional(),
+      diagram: z.enum(['dual-graph']).optional(),
+      alt: z.string(),
+      caption: z.string(),
+    }),
+});
+
+export const collections = { gallery, projects };
