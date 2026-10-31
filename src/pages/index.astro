@@ -8,9 +8,16 @@ import { SERIES } from '../series';
 const all = (await getCollection('gallery')).sort((a, b) => a.data.order - b.data.order);
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 const feature = all.find((e) => e.data.kind === 'scrolly');
+// The only pictures shown on the homepage, besides the River calendars hero.
+// Every other piece is listed by title under "More pictures".
+const HOME = ['drought-bands', 'storm-tracks'];
 const sections = SERIES.map((s) => ({
   ...s,
-  entries: all.filter((e) => e.data.series === s.id && e !== feature),
+  entries: all.filter((e) => e.data.series === s.id && HOME.includes(e.id)),
+})).filter((s) => s.entries.length);
+const more = SERIES.map((s) => ({
+  ...s,
+  entries: all.filter((e) => e.data.series === s.id && e !== feature && !HOME.includes(e.id)),
 })).filter((s) => s.entries.length);
 ---
 
@@ -55,6 +62,26 @@ const sections = SERIES.map((s) => ({
         </div>
       </section>
     ))}
+
+    {more.length > 0 && (
+      <section class="series" aria-labelledby="s-more">
+        <div class="series-head">
+          <h2 id="s-more">More pictures</h2>
+        </div>
+        <div class="more">
+          {more.map((s) => (
+            <div>
+              <h3>{s.title}</h3>
+              <ul>
+                {s.entries.map((e) => (
+                  <li><a href={`/work/${e.id}/`}>{e.data.title}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
 
     <section class="series" id="projects" aria-labelledby="s-projects">
       <div class="series-head">
@@ -159,6 +186,18 @@ const sections = SERIES.map((s) => ({
   @media (max-width: 640px) {
     .grid { grid-template-columns: 1fr; }
   }
+
+  .more {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 2rem;
+    max-width: 46rem;
+  }
+  .more h3 { font-size: var(--t-small); font-weight: 400; color: var(--faint); letter-spacing: 0.04em; text-transform: uppercase; }
+  .more ul { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+  .more li + li { margin-top: 0.35rem; }
+  .more a { color: var(--ink); text-decoration: none; font-size: var(--t-title); }
+  .more a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 
   .projects { list-style: none; margin: 0; padding: 0; max-width: 46rem; }
   .projects li + li { margin-top: 2.5rem; padding-top: 2.5rem; border-top: 1px solid var(--rule); }
