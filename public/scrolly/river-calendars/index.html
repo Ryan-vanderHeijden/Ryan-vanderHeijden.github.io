@@ -43,7 +43,8 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 v
 
 .steps { position: relative; margin-top: -100vh; margin-top: -100svh; pointer-events: none;
   padding-inline: 16px; }
-.step { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; }
+/* scroll pace: scene time advances one unit per step, so taller steps = slower animation */
+.step { min-height: 200vh; min-height: 200svh; display: flex; align-items: center; }
 .step:last-child { min-height: 70vh; align-items: flex-start; padding-top: 18vh; }
 .card { pointer-events: auto; box-sizing: border-box; width: 100%; max-width: var(--col);
   padding: 2px 0 4px 20px; border-left: 2px solid var(--season, var(--rule));
